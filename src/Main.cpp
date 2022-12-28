@@ -1,6 +1,10 @@
-#include <iostream>
+#include "headers/Game.h"
+
 
 int main() {
-    std::cout << "Hello, world!" << std::endl;
-    return 0;
+    Game* game = new Game();
+
+    game->Initialize();
+    game->Run();
+    game->Destroy();
 }
