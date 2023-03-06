@@ -6,6 +6,8 @@
 #include <string>
 #include <iostream>
 
+std::vector<LogEntry> Logger::messages;
+
 const std::string redColor     = "\x1b[31m";
 const std::string greenColor   = "\x1b[32m";
 const std::string defualtColor = "\x1b[0m";
@@ -34,12 +36,18 @@ std::string Logger::GetTimeStemp()
 void Logger::Log(const std::string &message)
 {
     const std::string timeStamp = Logger::GetTimeStemp();
-    std::cout << greenColor << "[LOG] " << timeStamp << " " << message << defualtColor << std::endl;
+    std::string new_message = "[LOG]   " + timeStamp + " " + message;
+    LogEntry logEntry = {LOG_INFO, new_message};
+    std::cout << greenColor << new_message << defualtColor << std::endl;
+    messages.push_back(logEntry);
 }
 
 void Logger::Err(const std::string &message)
 {
     const std::string timeStamp = Logger::GetTimeStemp();
-    std::cout << redColor << "[ERROR] " << timeStamp << " " << message << defualtColor << std::endl;
+    std::string new_message = "[ERROR] " + timeStamp + " " + message;
+    LogEntry logEntry = {LOG_ERROR, new_message};
+    std::cerr << redColor << new_message << defualtColor << std::endl;
+    messages.push_back(logEntry);
 }
 
