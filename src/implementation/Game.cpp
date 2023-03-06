@@ -1,5 +1,7 @@
 #include "../headers/Game.h"
+#include "../headers/Logger.h"
 #include <iostream>
+#include <string>
 
 glm::vec2 playerPosition;
 glm::vec2 playerVelocity;
@@ -7,19 +9,19 @@ glm::vec2 playerVelocity;
 Game::Game()
 {
     this->isRunning = false;
-    std::cout << "Game Constructor got called" << std::endl;
+    Logger::Log("Game Constructor got called");
 }
 
 Game::~Game()
 {
-    std::cout << "Game Destructor got called" << std::endl;
+    Logger::Err("Game Destructor got called");
 }
 
 void Game::Initialize()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
-        std::cerr << "Error initializing SDL" << std::endl;
+        Logger::Err("Error initializing SDL");
         return;
     }
     SDL_DisplayMode  displayMode;
@@ -35,13 +37,13 @@ void Game::Initialize()
             SDL_WINDOW_BORDERLESS);
     if(!this->window)
     {
-     std::cerr << "Error creating SDL window" << std::endl;
+     Logger::Err("Error creating SDL window");
      return;
     }
     this->renderer = SDL_CreateRenderer(window,-1,0);
     if (!this->renderer)
     {
-        std::cerr << "Error creating SDL renderer" << std::endl;
+        Logger::Err("Error creating SDL renderer");
     }
     SDL_SetWindowFullscreen(this->window,SDL_WINDOW_FULLSCREEN);
     this->isRunning = true;
