@@ -1,5 +1,5 @@
-#include "../headers/Game.h"
-#include "../headers/Logger.h"
+#include "Game.h"
+#include "../Logger/Logger.h"
 #include <iostream>
 #include <string>
 

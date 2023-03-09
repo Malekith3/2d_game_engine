@@ -1,4 +1,4 @@
-#include "../headers/Logger.h"
+#include "../Logger/Logger.h"
 #include <chrono>
 #include <ctime>
 #include <iomanip>
@@ -39,7 +39,7 @@ void Logger::Log(const std::string &message)
     std::string new_message = "[LOG]   " + timeStamp + " " + message;
     LogEntry logEntry = {LOG_INFO, new_message};
     std::cout << greenColor << new_message << defualtColor << std::endl;
-    messages.push_back(logEntry);
+    messages.push_back(logEntry);      
 }
 
 void Logger::Err(const std::string &message)
