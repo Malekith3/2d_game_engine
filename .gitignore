@@ -2,3 +2,5 @@ game_engine
 .idea
 .vscode
 assets
+cmake-build-*
+.DS_Store

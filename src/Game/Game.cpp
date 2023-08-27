@@ -1,27 +1,24 @@
 #include "Game.h"
-#include "../Logger/Logger.h"
 #include <iostream>
 #include <string>
-
-glm::vec2 playerPosition;
-glm::vec2 playerVelocity;
+#include "Logger/logger.h"
 
 Game::Game()
 {
     this->isRunning = false;
-    Logger::Log("Game Constructor got called");
+    LOGGER_TRACE("Game Constructor got called");
 }
 
 Game::~Game()
 {
-    Logger::Err("Game Destructor got called");
+    LOGGER_ERROR("Game Destructor got called");
 }
 
 void Game::Initialize()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
-        Logger::Err("Error initializing SDL");
+        LOGGER_ERROR("Error initializing SDL");
         return;
     }
     SDL_DisplayMode  displayMode;
@@ -37,13 +34,13 @@ void Game::Initialize()
             SDL_WINDOW_BORDERLESS);
     if(!this->window)
     {
-     Logger::Err("Error creating SDL window");
-     return;
+      LOGGER_ERROR("Error creating SDL window");
+      return;
     }
     this->renderer = SDL_CreateRenderer(window,-1,0);
     if (!this->renderer)
     {
-        Logger::Err("Error creating SDL renderer");
+      LOGGER_ERROR("Error creating SDL renderer");
     }
     SDL_SetWindowFullscreen(this->window,SDL_WINDOW_FULLSCREEN);
     this->isRunning = true;
@@ -90,8 +87,9 @@ void Game::Update()
     //Store the current frame time
     this->millisecsPreviousFrame = SDL_GetTicks();
 
-    glm::vec2 displacment = playerVelocity * deltaTime;
-    playerPosition += displacment;
+    // TODO:
+    // MovementSystem.Update()
+    // CollisionSystem.Update
 }
 
 void Game::Render()
@@ -103,15 +101,8 @@ void Game::Render()
     SDL_Surface* surface = IMG_Load("./assets/images/tank-tiger-right.png");
     SDL_Texture* texture = SDL_CreateTextureFromSurface(this->renderer, surface);
     SDL_FreeSurface(surface);
-
-    // Render texture
-    SDL_Rect destRect = {
-            static_cast<int>(playerPosition.x),
-            static_cast<int>(playerPosition.y),
-            32,
-            32};
-    SDL_RenderCopy(this->renderer,texture,nullptr,&destRect);
-    SDL_DestroyTexture(texture);
+    
+    // TODO: Render game objects... 
 
     SDL_RenderPresent(this->renderer);
 }
@@ -123,7 +114,10 @@ void Game::Destroy()
 }
 
 void Game::Setup() {
-    playerPosition = {20.0,10.0};
-    playerVelocity = {10.0,5.0};
+    // TODO :
+    // Entity tank = registry.CreateEntity();
+    // tank.AddComponent<TransformComponent>();
+    // tank.AddComponent<BoxColliderComponent>();
+    // tank.AddComponent<SpriteComponent>("./assets/images/tank.png")
 }
 

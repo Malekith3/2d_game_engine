@@ -1,0 +1,25 @@
+{
+  "name" : "2d-game-engine",
+  "version-string" : "1.0.0",
+  "builtin-baseline" : "436a061a544c124200200517b9ee55c5bb1b7a26",
+  "dependencies" : [ {
+    "name" : "spdlog",
+    "version>=" : "1.12.0",
+    "$comment" : "    find_package(spdlog CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE spdlog::spdlog)\n"
+  }, {
+    "name" : "sdl2",
+    "version>=" : "2.26.5"
+  }, {
+    "name" : "sdl2-gfx",
+    "version>=" : "1.0.4#10"
+  }, {
+    "name" : "sdl2-image",
+    "version>=" : "2.6.3"
+  }, {
+    "name" : "sdl2-mixer",
+    "version>=" : "2.6.3#1"
+  }, {
+    "name" : "sdl2-ttf",
+    "version>=" : "2.20.2"
+  } ]
+}
