@@ -4,9 +4,8 @@
 
 int main(int argc,char* argv[]) {
   Logger::Initialize();
-  Game* game = new Game();
+  auto game = std::make_unique<Game>();
   game->Initialize();
   game->Run();
   game->Destroy();
-  delete game;
 }
