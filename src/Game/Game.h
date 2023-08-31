@@ -1,19 +1,21 @@
 #ifndef INC_2D_GAME_ENGINE_GAME_H
 #define INC_2D_GAME_ENGINE_GAME_H
 
+#include <memory>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <glm/glm.hpp>
+#include "ECS/ECS.h"
 
 const int FPS = 30;
-const int MILLISECS_PER_FRAME = 1000 / FPS;
+const int MILLISEC_PER_FRAME = 1000 / FPS;
 
 class Game {
 private:
     bool isRunning;
     SDL_Window* window ;
     SDL_Renderer* renderer;
-    int millisecsPreviousFrame = 0;
+    int millisec_previous_frame = 0;
+    std::unique_ptr<Registry> registry;
 public:
     Game();
     ~Game();

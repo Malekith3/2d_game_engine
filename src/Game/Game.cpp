@@ -1,11 +1,13 @@
 #include "Game.h"
-#include <iostream>
 #include <string>
 #include "Logger/logger.h"
+#include "Components/TransformComponent.h"
+#include "Components/RigidBodyComponent.h"
 
 Game::Game()
 {
     this->isRunning = false;
+    registry = std::make_unique<Registry>();
     LOGGER_TRACE("Game Constructor got called");
 }
 
@@ -77,15 +79,15 @@ void Game::ProcessInput()
 
 void Game::Update()
 {
-    // If we are too fast, waste some time until we reach the MILLISECS_PER_FRAME
-    int timeToWait = MILLISECS_PER_FRAME - (SDL_GetTicks() - millisecsPreviousFrame);
-    if(timeToWait > 0 && timeToWait <= MILLISECS_PER_FRAME)
+    // If we are too fast, waste some time until we reach the MILLISEC_PER_FRAME
+    int timeToWait = MILLISEC_PER_FRAME - (SDL_GetTicks() - millisec_previous_frame);
+    if(timeToWait > 0 && timeToWait <= MILLISEC_PER_FRAME)
         SDL_Delay(timeToWait);
 
-    float deltaTime = (SDL_GetTicks() - this->millisecsPreviousFrame)/1000.0f;
+    float deltaTime = (SDL_GetTicks() - millisec_previous_frame)/1000.0f;
     
     //Store the current frame time
-    this->millisecsPreviousFrame = SDL_GetTicks();
+    millisec_previous_frame = SDL_GetTicks();
 
     // TODO:
     // MovementSystem.Update()
@@ -114,8 +116,9 @@ void Game::Destroy()
 }
 
 void Game::Setup() {
-    // TODO :
-    // Entity tank = registry.CreateEntity();
+    Entity tank = registry->CreateEntity();
+    tank.AddComponent<TransformComponent>(glm::vec2(1,1),glm::vec2(1,1),0.0);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(1.0,0.0));
     // tank.AddComponent<TransformComponent>();
     // tank.AddComponent<BoxColliderComponent>();
     // tank.AddComponent<SpriteComponent>("./assets/images/tank.png")
