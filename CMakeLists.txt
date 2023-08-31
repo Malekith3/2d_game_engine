@@ -16,8 +16,10 @@ find_package(spdlog REQUIRED)
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
-
-add_executable(${project_name} ${SRC_FILES})
+file(GLOB_RECURSE HEADERS_FILES CONFIGURE_DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+)
+add_executable(${project_name} ${SRC_FILES} ${HEADERS_FILES})
 
 target_include_directories(${project_name}
         PRIVATE
