@@ -37,7 +37,7 @@ export VCPKG_ROOT=/path/to/vcpkg
 ````
 
 ========================================================================================================================================================================
-## Building the Project  <span style="color:#e0e0ff">Building the Project/span>
+## Building the Project  <span style="color:#e0e0ff">Building the Project</span>
 
 **Clone the Repository**: Begin by cloning your project repository.
 
@@ -65,4 +65,4 @@ cmake -B build_folder -S . -DCMAKE_TOOLCHAIN_FILE=[path to vcpkg]/scripts/builds
 cmake --build build_folder
 ````
 
-**Executable name:** <span style="color:RED">2d_game_engine</span>
+**Executable name:** <span style="color:red">2d_game_engine</span>
