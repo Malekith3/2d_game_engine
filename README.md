@@ -25,6 +25,18 @@ This guide explains how to build the project on different platforms using CMake 
 
 - **Compiler**: You'll need a C++ compiler compatible with your platform.
 
+## VCPKG Configuration
+**VCPKG_ROOT:**
+#### Windows
+````Bash
+setx VCPKG_ROOT "C:\path\to\vcpkg"
+````
+#### Linux/Macos
+````Bash
+export VCPKG_ROOT=/path/to/vcpkg
+````
+
+=========================================================================================================================
 ## Building the Project  <span style="color:#e0e0ff">Building the Project/span>
 
 **Clone the Repository**: Begin by cloning your project repository.
