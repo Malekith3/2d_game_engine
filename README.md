@@ -36,7 +36,7 @@ setx VCPKG_ROOT "C:\path\to\vcpkg"
 export VCPKG_ROOT=/path/to/vcpkg
 ````
 
-=========================================================================================================================
+=================================================================================================
 ## Building the Project  <span style="color:#e0e0ff">Building the Project/span>
 
 **Clone the Repository**: Begin by cloning your project repository.
