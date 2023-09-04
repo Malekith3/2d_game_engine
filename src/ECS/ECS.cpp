@@ -38,6 +38,9 @@ void System::AddEntityToSystem(const Entity &entity) {
 const Signature &System::GetComponentSignature() const {
   return componentSignature;
 }
+const std::vector<Entity> &System::GetSystemEntities() const {
+  return entities;
+}
 
 Entity Registry::CreateEntity() {
   auto entityId = numEntities++;

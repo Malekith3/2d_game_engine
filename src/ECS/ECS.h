@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include "Logger/logger.h"
 
+
 const uint32_t  MAX_COMPONENTS = 32;
 ////////////////////////////////////////////////////////////////////////////////
 // Signature
@@ -74,7 +75,7 @@ class Pool: public IPool{
   void Resize(uint32_t size){data.resize(size);}
   void Clear() {data.clear();}
   void Set(uint32_t index, TObject object){data[index] = object;}
-  TObject& Get(uint32_t index){return static_cast<TObject&>(data[index]);}
+  TObject& Get(uint32_t index){return data[index];}
   TObject& operator [](uint32_t index){return data[index];}
 };
 
@@ -96,6 +97,7 @@ class System{
   bool RemoveEntityFromSystem(Entity &entity);
   const std::vector<Entity> &GetEntities() const;
   const Signature &GetComponentSignature() const;
+  const std::vector<Entity>& GetSystemEntities() const;
 
   template<typename TComponent> void RequreComponent();
 };
@@ -164,7 +166,7 @@ template<typename TSystem>
 TSystem &Registry::GetSystem() const {
   auto type_id = std::type_index(typeid(TSystem));
   auto it = systems.find(type_id);
-  return static_cast<std::shared_ptr<TSystem>>(it->second);
+  return *std::static_pointer_cast<TSystem>(it->second);
 }
 
 template<typename TSystem>
@@ -182,9 +184,8 @@ void Registry::RemoveSystem() {
 template<typename TSystem, typename... TArgs>
 void Registry::AddSystem(TArgs &&... args) {
   auto newSystem = std::make_shared<TSystem>(std::forward<TArgs>(args)...);
-  auto type_id = std::type_index(typeid(newSystem));
+  auto type_id = std::type_index(typeid(TSystem));
   systems.emplace(std::make_pair(type_id,newSystem));
-
 }
 
 template<typename TComponent>
@@ -197,9 +198,11 @@ void Registry::RemoveComponent(Entity entity) {
   entityComponentSignatures[entity.GetId()].set(Component<TComponent>::GetId(),false);
 }
 template<typename TComponent>
-TComponent &Registry::GetComponent(Entity entity) {
-  Pool<TComponent>* componentPool = componentPools[Component<TComponent>::GetId()];
-  return componentPool->Get(entity.GetId());
+TComponent& Registry::GetComponent(Entity entity) {
+  const auto componentId = Component<TComponent>::GetId();
+  const auto entityId = entity.GetId();
+  auto componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
+  return componentPool->Get(entityId);;
 }
 
 template<typename T>
