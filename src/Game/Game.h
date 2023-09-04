@@ -16,6 +16,7 @@ private:
     SDL_Renderer* renderer;
     int millisec_previous_frame = 0;
     std::unique_ptr<Registry> registry;
+
 public:
     Game();
     ~Game();

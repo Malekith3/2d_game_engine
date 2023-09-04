@@ -3,6 +3,7 @@
 #include "Logger/logger.h"
 #include "Components/TransformComponent.h"
 #include "Components/RigidBodyComponent.h"
+#include "Systems/MovementSystem.h"
 
 Game::Game()
 {
@@ -33,7 +34,7 @@ void Game::Initialize()
             SDL_WINDOWPOS_CENTERED,
             this->windowWidth,
             this->windowHeight,
-            SDL_WINDOW_BORDERLESS);
+            SDL_WINDOW_RESIZABLE);
     if(!this->window)
     {
       LOGGER_ERROR("Error creating SDL window");
@@ -44,7 +45,6 @@ void Game::Initialize()
     {
       LOGGER_ERROR("Error creating SDL renderer");
     }
-    SDL_SetWindowFullscreen(this->window,SDL_WINDOW_FULLSCREEN);
     this->isRunning = true;
 }
 
@@ -84,14 +84,14 @@ void Game::Update()
     if(timeToWait > 0 && timeToWait <= MILLISEC_PER_FRAME)
         SDL_Delay(timeToWait);
 
-    float deltaTime = (SDL_GetTicks() - millisec_previous_frame)/1000.0f;
+    double deltaTime = (SDL_GetTicks() - millisec_previous_frame)/1000.0f;
     
     //Store the current frame time
     millisec_previous_frame = SDL_GetTicks();
 
-    // TODO:
-    // MovementSystem.Update()
-    // CollisionSystem.Update
+    registry->Update();
+  registry->GetSystem<MovementSystem>().Update(deltaTime);
+
 }
 
 void Game::Render()
@@ -116,11 +116,14 @@ void Game::Destroy()
 }
 
 void Game::Setup() {
-    Entity tank = registry->CreateEntity();
-    tank.AddComponent<TransformComponent>(glm::vec2(1,1),glm::vec2(1,1),0.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(1.0,0.0));
-    // tank.AddComponent<TransformComponent>();
-    // tank.AddComponent<BoxColliderComponent>();
-    // tank.AddComponent<SpriteComponent>("./assets/images/tank.png")
+  // Add the systems that need to be processed in our game
+  registry->AddSystem<MovementSystem>();
+
+  // Create an entity
+  Entity tank = registry->CreateEntity();
+
+  // Add some components to that entity
+  tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
+  tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 50.0));
 }
 
