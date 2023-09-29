@@ -17,6 +17,5 @@ void MovementSystem::Update(double deltaTime) {
       auto& rigidBody = entity.GetComponent<RigidBodyComponent>();
 
       transform.m_position += rigidBody.m_velocity * static_cast<float>(deltaTime);
-      LOGGER_WARN("Entity ID = {} moved to x: {} , y: {}",entity.GetId(),transform.m_position.x,transform.m_position.y);
     }
 }

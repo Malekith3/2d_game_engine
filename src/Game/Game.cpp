@@ -4,6 +4,8 @@
 #include "Components/TransformComponent.h"
 #include "Components/RigidBodyComponent.h"
 #include "Systems/MovementSystem.h"
+#include "Systems/RenderSystem.h"
+#include "Components/SpriteComponent.h"
 
 Game::Game()
 {
@@ -98,7 +100,7 @@ void Game::Render()
 {
     SDL_SetRenderDrawColor(this->renderer,21,21,21,255);
     SDL_RenderClear(this->renderer);
-
+    registry->GetSystem<RenderSystem>().Update(renderer);
     //Load a PNG texture
     SDL_Surface* surface = IMG_Load("./assets/images/tank-tiger-right.png");
     SDL_Texture* texture = SDL_CreateTextureFromSurface(this->renderer, surface);
@@ -118,12 +120,19 @@ void Game::Destroy()
 void Game::Setup() {
   // Add the systems that need to be processed in our game
   registry->AddSystem<MovementSystem>();
-
+  registry->AddSystem<RenderSystem>();
   // Create an entity
   Entity tank = registry->CreateEntity();
 
   // Add some components to that entity
   tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
   tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 50.0));
+  tank.AddComponent<SpriteComponent>(10,10);
+
+  Entity track = registry->CreateEntity();
+  // Add some components to that entity
+  track.AddComponent<TransformComponent>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+  track.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
+  track.AddComponent<SpriteComponent>(10,60);
 }
 
