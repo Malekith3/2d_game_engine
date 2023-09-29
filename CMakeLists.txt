@@ -6,11 +6,11 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(libs)
 include_directories(src)
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_IMAGE REQUIRED)
-find_package(SDL2_TTF REQUIRED)
-find_package(SDL2_Mixer REQUIRED)
-find_package(spdlog REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
+find_package(SDL2_image  REQUIRED)
+find_package(SDL2_ttf  REQUIRED)
+find_package(SDL2_mixer REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
