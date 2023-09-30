@@ -11,6 +11,7 @@ find_package(SDL2_image  REQUIRED)
 find_package(SDL2_ttf  REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_path(RAPIDCSV_INCLUDE_DIRS "rapidcsv.h")
 
 
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
@@ -32,3 +33,4 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_image::S
 target_link_libraries(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>)
 target_link_libraries(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>)
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog_header_only)
+target_include_directories(${PROJECT_NAME} PRIVATE ${RAPIDCSV_INCLUDE_DIRS})

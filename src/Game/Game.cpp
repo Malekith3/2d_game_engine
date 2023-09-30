@@ -1,16 +1,17 @@
 #include "Game.h"
-#include <string>
+#include "rapidcsv.h"
 #include "Logger/logger.h"
-#include "Components/TransformComponent.h"
-#include "Components/RigidBodyComponent.h"
-#include "Systems/MovementSystem.h"
 #include "Systems/RenderSystem.h"
+#include "Systems/MovementSystem.h"
 #include "Components/SpriteComponent.h"
+#include "Components/RigidBodyComponent.h"
+#include "Components/TransformComponent.h"
 
 Game::Game()
 {
     this->isRunning = false;
     registry = std::make_unique<Registry>();
+    assetStore = std::make_unique<AssetStore>();
     LOGGER_TRACE("Game Constructor got called");
 }
 
@@ -100,14 +101,7 @@ void Game::Render()
 {
     SDL_SetRenderDrawColor(this->renderer,21,21,21,255);
     SDL_RenderClear(this->renderer);
-    registry->GetSystem<RenderSystem>().Update(renderer);
-    //Load a PNG texture
-    SDL_Surface* surface = IMG_Load("./assets/images/tank-tiger-right.png");
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(this->renderer, surface);
-    SDL_FreeSurface(surface);
-    
-    // TODO: Render game objects... 
-
+    registry->GetSystem<RenderSystem>().Update(renderer,assetStore);
     SDL_RenderPresent(this->renderer);
 }
 
@@ -117,22 +111,53 @@ void Game::Destroy()
     SDL_DestroyWindow(this->window);
 }
 
-void Game::Setup() {
+void Game::LoadLevel(uint32_t level_number){
   // Add the systems that need to be processed in our game
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
+
+  //Adding Assets
+  assetStore->AddTexture("tank-image","../assets/images/tank-panther-right.png",renderer);
+  assetStore->AddTexture("truck-image","../assets/images/truck-ford-right.png",renderer);
+  assetStore->AddTexture("tilemap-image","../assets/tilemaps/jungle.png",renderer);
+
+  //Load a Map
+  rapidcsv::Document doc("../assets/tilemaps/jungle.map", rapidcsv::LabelParams(-1, -1));
+
+  //constants
+  int tileSize = 32;
+  double tileScale = 2.0;
+
+  for(int y = 0; y < doc.GetRowCount(); y++){
+    auto tileRow = doc.GetRow<std::string>(y);
+    for(int x = 0; x <tileRow.size();x++){
+      int srcRectY = (tileRow[x][0] - '0') * tileSize;
+      int srcRectX = (tileRow[x][1] - '0') * tileSize;
+      auto newTile = registry->CreateEntity();
+      newTile.AddComponent<TransformComponent>(   glm::vec2(x * (tileScale * tileSize),
+                                                         y * (tileScale * tileSize)),
+                                                    glm::vec2(tileScale, tileScale), 0.0);
+      newTile.AddComponent<SpriteComponent>(tileSize, tileSize,"tilemap-image",0, srcRectX, srcRectY);
+    }
+  }
+
+
   // Create an entity
   Entity tank = registry->CreateEntity();
 
   // Add some components to that entity
-  tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
-  tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 50.0));
-  tank.AddComponent<SpriteComponent>(10,10);
+  tank.AddComponent<TransformComponent>(glm::vec2(10.0, 70.0), glm::vec2(1.0, 1.0), 0.0);
+  tank.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
+  tank.AddComponent<SpriteComponent>(32,32,"tank-image",1);
 
   Entity track = registry->CreateEntity();
   // Add some components to that entity
-  track.AddComponent<TransformComponent>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+  track.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
   track.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
-  track.AddComponent<SpriteComponent>(10,60);
+  track.AddComponent<SpriteComponent>(32,32, "truck-image",1);
+}
+
+void Game::Setup() {
+  LoadLevel(1);
 }
 
