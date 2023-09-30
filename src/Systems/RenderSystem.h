@@ -6,12 +6,13 @@
 #define INC_2D_GAME_ENGINE_SRC_SYSTEMS_RENDERSYSTEM_H_
 
 #include "ECS/ECS.h"
+#include "AssetStore/AssetStore.h"
 
 class RenderSystem : public System {
  public:
   RenderSystem();
   ~RenderSystem() = default;
-  void Update(SDL_Renderer* renderer);
+  void Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore);
 
 };
 

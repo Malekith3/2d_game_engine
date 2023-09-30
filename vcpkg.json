@@ -18,5 +18,8 @@
   }, {
     "name" : "spdlog",
     "version>=" : "1.12.0"
+  }, {
+    "name" : "rapidcsv",
+    "version>=" : "8.64"
   } ]
 }
