@@ -6,6 +6,8 @@
 #include "Components/SpriteComponent.h"
 #include "Components/RigidBodyComponent.h"
 #include "Components/TransformComponent.h"
+#include "Components/AnimationComponent.h"
+#include "Systems/AnimationSystem.h"
 
 Game::Game()
 {
@@ -94,6 +96,7 @@ void Game::Update()
 
     registry->Update();
   registry->GetSystem<MovementSystem>().Update(deltaTime);
+  registry->GetSystem<AnimationSystem>().Update();
 
 }
 
@@ -115,10 +118,12 @@ void Game::LoadLevel(uint32_t level_number){
   // Add the systems that need to be processed in our game
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
+  registry->AddSystem<AnimationSystem>();
 
   //Adding Assets
   assetStore->AddTexture("tank-image","../assets/images/tank-panther-right.png",renderer);
   assetStore->AddTexture("truck-image","../assets/images/truck-ford-right.png",renderer);
+  assetStore->AddTexture("chopper-image","../assets/images/chopper.png",renderer);
   assetStore->AddTexture("tilemap-image","../assets/tilemaps/jungle.png",renderer);
 
   //Load a Map
@@ -143,8 +148,16 @@ void Game::LoadLevel(uint32_t level_number){
 
 
   // Create an entity
-  Entity tank = registry->CreateEntity();
+  Entity chopper = registry->CreateEntity();
 
+  // Add some components to that entity
+  chopper.AddComponent<TransformComponent>(glm::vec2(80.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+  chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+  chopper.AddComponent<SpriteComponent>(32,32,"chopper-image",1);
+  chopper.AddComponent<AnimationComponent>(2,12);
+
+  // Create an entity
+  Entity tank = registry->CreateEntity();
   // Add some components to that entity
   tank.AddComponent<TransformComponent>(glm::vec2(10.0, 70.0), glm::vec2(1.0, 1.0), 0.0);
   tank.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
