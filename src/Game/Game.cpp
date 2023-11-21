@@ -181,6 +181,7 @@ void Game::LoadLevel(uint32_t level_number){
   track.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
   track.AddComponent<SpriteComponent>(32,32, "truck-image",1);
   track.AddComponent<BoxColliderComponent>(32,32);
+
 }
 
 void Game::Setup() {

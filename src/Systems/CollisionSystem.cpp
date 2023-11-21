@@ -23,7 +23,7 @@ void CollisionSystem::Update() {
       auto& aCollider = entityA.GetComponent<BoxColliderComponent>();
 
       for(auto j = i + 1;j!= entities.end();++j){
-        auto& entityB = *j;
+        auto entityB = *j;
 
         auto& bTransform = entityB.GetComponent<TransformComponent>();
         auto& bCollider = entityB.GetComponent<BoxColliderComponent>();
@@ -35,6 +35,8 @@ void CollisionSystem::Update() {
                                          bCollider.width,bCollider.height);
         if(CheckAABBCollision(boxColliderA,boxColliderB)){
           LOGGER_ERROR("[COLLISION DETECTION] Entity {} collided with Entity {}", entityA.GetId(),entityB.GetId());
+          entityB.Kill();
+          entityA.Kill();
         }
       }
     }
