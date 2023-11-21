@@ -15,7 +15,9 @@ bool Entity::operator!=(const Entity &rhs) const {
 bool Entity::operator<(const Entity &other) const {
   return id < other.id;
 }
-
+void Entity::Kill() {
+  registry->KillEntity(*this);
+}
 
 const std::vector<Entity> &System::GetEntities() const {
   return entities;
@@ -43,12 +45,21 @@ const std::vector<Entity> &System::GetSystemEntities() const {
 }
 
 Entity Registry::CreateEntity() {
-  auto entityId = numEntities++;
+  int entityId;
+  if(freeIds.empty()){
+    entityId = numEntities++;
+    if(entityId >= entityComponentSignatures.size()){
+      entityComponentSignatures.resize(entityId+1);
+    }
+  }
+  else{
+    entityId = freeIds.front();
+    freeIds.pop_front();
+  }
+
   Entity entity(entityId);
   entity.registry = this;
-  if(entityId >= entityComponentSignatures.size()){
-    entityComponentSignatures.resize(entityId+1);
-  }
+
   entitiesToBeAdded.emplace(entity);
   LOGGER_TRACE("[Registry::CreateEntity] Entity created with ID = {}", entityId);
   return entity;
@@ -59,6 +70,14 @@ void Registry::Update() {
     AddEntityToSystem(entity);
   }
   entitiesToBeAdded.clear();
+
+  for(auto entity: entitiesToBeKilled){
+    RemoveEntityFromSystem(entity);
+    entityComponentSignatures[entity.GetId()].reset();
+
+    freeIds.push_back(entity.GetId());
+  }
+  entitiesToBeKilled.clear();
 
 }
 
@@ -75,6 +94,16 @@ void Registry::AddEntityToSystem(const Entity &entity) {
     if (isInterested) {
       system.second->AddEntityToSystem(entity);
     }
+  }
+}
+
+void Registry::KillEntity(Entity &entity) {
+    entitiesToBeKilled.emplace(entity);
+}
+
+void Registry::RemoveEntityFromSystem(Entity &entity) {
+  for(auto& system : systems){
+      system.second->RemoveEntityFromSystem(entity);
   }
 }
 

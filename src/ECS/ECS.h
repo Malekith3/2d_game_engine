@@ -7,6 +7,7 @@
 #include <vector>
 #include <typeindex>
 #include <unordered_map>
+#include <deque>
 #include "Logger/logger.h"
 
 
@@ -40,6 +41,7 @@ class Entity{
  public:
   explicit Entity(uint32_t id) : id(id){};
   uint32_t GetId() const;
+  void Kill();
   bool operator==(const Entity &rhs) const;
   bool operator!=(const Entity &rhs) const;
   bool operator<(const Entity& other) const;
@@ -118,10 +120,15 @@ class Registry{
   std::vector<Signature> entityComponentSignatures;
   std::unordered_map<std::type_index,std::shared_ptr<System>> systems;
 
+  //List of free entity's ids that was previously removed
+  std::deque<int> freeIds;
+
  public:
   Registry() = default;
   Entity CreateEntity();
+  void KillEntity(Entity& entity);
   void AddEntityToSystem(const Entity &entity);
+  void RemoveEntityFromSystem(Entity& entity);
   template<typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
   template<typename TComponent> void RemoveComponent(Entity entity);
   template<typename TComponent> bool HasComponent(Entity entity);
