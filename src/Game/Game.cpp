@@ -8,10 +8,14 @@
 #include "Components/TransformComponent.h"
 #include "Components/AnimationComponent.h"
 #include "Systems/AnimationSystem.h"
+#include "Components/BoxColliderComponent.h"
+#include "Systems/CollisionSystem.h"
+#include "Systems/RenderCollisionSystem.h"
 
 Game::Game()
 {
     this->isRunning = false;
+    this->isDebug = true;
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
     LOGGER_TRACE("Game Constructor got called");
@@ -77,6 +81,9 @@ void Game::ProcessInput()
             case SDL_KEYDOWN:
                 if(sdlEvent.key.keysym.sym == SDLK_ESCAPE)
                     this->isRunning = false;
+                else if(sdlEvent.key.keysym.sym == SDLK_d || sdlEvent.key.keysym.sym == SDLK_KP_D){
+                  isDebug = !isDebug;
+                }
                 break;
         }
     }
@@ -93,10 +100,10 @@ void Game::Update()
     
     //Store the current frame time
     millisec_previous_frame = SDL_GetTicks();
-
     registry->Update();
-  registry->GetSystem<MovementSystem>().Update(deltaTime);
-  registry->GetSystem<AnimationSystem>().Update();
+    registry->GetSystem<MovementSystem>().Update(deltaTime);
+    registry->GetSystem<AnimationSystem>().Update();
+    registry->GetSystem<CollisionSystem>().Update();
 
 }
 
@@ -105,6 +112,8 @@ void Game::Render()
     SDL_SetRenderDrawColor(this->renderer,21,21,21,255);
     SDL_RenderClear(this->renderer);
     registry->GetSystem<RenderSystem>().Update(renderer,assetStore);
+    if(isDebug)
+      registry->GetSystem<RenderCollisionSystem>().Update(renderer);
     SDL_RenderPresent(this->renderer);
 }
 
@@ -119,6 +128,8 @@ void Game::LoadLevel(uint32_t level_number){
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
   registry->AddSystem<AnimationSystem>();
+  registry->AddSystem<CollisionSystem>();
+  registry->AddSystem<RenderCollisionSystem>();
 
   //Adding Assets
   assetStore->AddTexture("tank-image","../assets/images/tank-panther-right.png",renderer);
@@ -159,15 +170,17 @@ void Game::LoadLevel(uint32_t level_number){
   // Create an entity
   Entity tank = registry->CreateEntity();
   // Add some components to that entity
-  tank.AddComponent<TransformComponent>(glm::vec2(10.0, 70.0), glm::vec2(1.0, 1.0), 0.0);
-  tank.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
+  tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+  tank.AddComponent<RigidBodyComponent>(glm::vec2(-30.0, 0.0));
   tank.AddComponent<SpriteComponent>(32,32,"tank-image",1);
+  tank.AddComponent<BoxColliderComponent>(32,32);
 
   Entity track = registry->CreateEntity();
   // Add some components to that entity
   track.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
   track.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
   track.AddComponent<SpriteComponent>(32,32, "truck-image",1);
+  track.AddComponent<BoxColliderComponent>(32,32);
 }
 
 void Game::Setup() {
