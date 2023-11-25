@@ -21,14 +21,7 @@ file(GLOB_RECURSE HEADERS_FILES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
 )
 add_executable(${project_name} ${SRC_FILES} ${HEADERS_FILES}
-        src/Components/AnimationComponent.h
-        src/Systems/AnimationSystem.cpp
-        src/Systems/AnimationSystem.h
-        src/Components/BoxColliderComponent.h
-        src/Systems/CollisionSystem.cpp
-        src/Systems/CollisionSystem.h
-        src/Systems/RenderCollisionSystem.cpp
-        src/Systems/RenderCollisionSystem.h)
+        src/Systems/KeyboardControlSystem.h)
 
 target_include_directories(${project_name}
         PRIVATE
