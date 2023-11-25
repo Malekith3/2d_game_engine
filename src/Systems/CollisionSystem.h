@@ -5,10 +5,11 @@
 #ifndef INC_2D_GAME_ENGINE_SRC_SYSTEMS_COLLISIONSYSTEM_H_
 #define INC_2D_GAME_ENGINE_SRC_SYSTEMS_COLLISIONSYSTEM_H_
 #include "ECS/ECS.h"
+#include "EventBus/EventBus.h"
 class CollisionSystem : public System {
  public:
   CollisionSystem();
-  void Update();
+  void CollisionSystem::Update(std::unique_ptr<EventBus>& eventBus);
 };
 
 struct CollisionBoxWrapper{

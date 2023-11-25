@@ -1,16 +1,17 @@
 #include "Game.h"
 #include "rapidcsv.h"
 #include "Logger/logger.h"
+#include "Systems/DamageSystem.h"
 #include "Systems/RenderSystem.h"
 #include "Systems/MovementSystem.h"
+#include "Systems/CollisionSystem.h"
+#include "Systems/AnimationSystem.h"
 #include "Components/SpriteComponent.h"
 #include "Components/RigidBodyComponent.h"
 #include "Components/TransformComponent.h"
 #include "Components/AnimationComponent.h"
-#include "Systems/AnimationSystem.h"
-#include "Components/BoxColliderComponent.h"
-#include "Systems/CollisionSystem.h"
 #include "Systems/RenderCollisionSystem.h"
+#include "Components/BoxColliderComponent.h"
 
 Game::Game()
 {
@@ -18,6 +19,7 @@ Game::Game()
     this->isDebug = true;
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
+    eventBus = std::make_unique<EventBus>();
     LOGGER_TRACE("Game Constructor got called");
 }
 
@@ -100,10 +102,15 @@ void Game::Update()
     
     //Store the current frame time
     millisec_previous_frame = SDL_GetTicks();
+    eventBus->Reset();
+    //Perform Subscription of all systems
+    registry->GetSystem<DamageSystem>().SubscribeToEvent(eventBus);
+
+    //Update Systems
     registry->Update();
     registry->GetSystem<MovementSystem>().Update(deltaTime);
     registry->GetSystem<AnimationSystem>().Update();
-    registry->GetSystem<CollisionSystem>().Update();
+    registry->GetSystem<CollisionSystem>().Update(eventBus);
 
 }
 
@@ -125,8 +132,9 @@ void Game::Destroy()
 
 void Game::LoadLevel(uint32_t level_number){
   // Add the systems that need to be processed in our game
-  registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
+  registry->AddSystem<DamageSystem>();
+  registry->AddSystem<MovementSystem>();
   registry->AddSystem<AnimationSystem>();
   registry->AddSystem<CollisionSystem>();
   registry->AddSystem<RenderCollisionSystem>();

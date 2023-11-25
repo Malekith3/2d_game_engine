@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "AssetStore/AssetStore.h"
+#include "EventBus/EventBus.h"
 
 const int FPS = 30;
 const int MILLISEC_PER_FRAME = 1000 / FPS;
@@ -19,6 +20,7 @@ private:
     int millisec_previous_frame = 0;
     std::unique_ptr<Registry> registry;
     std::unique_ptr<AssetStore> assetStore;
+    std::unique_ptr<EventBus> eventBus;
 
 public:
     Game();

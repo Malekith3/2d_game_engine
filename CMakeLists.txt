@@ -28,7 +28,12 @@ add_executable(${project_name} ${SRC_FILES} ${HEADERS_FILES}
         src/Systems/CollisionSystem.cpp
         src/Systems/CollisionSystem.h
         src/Systems/RenderCollisionSystem.cpp
-        src/Systems/RenderCollisionSystem.h)
+        src/Systems/RenderCollisionSystem.h
+        src/Events/CollisionEvent.h
+        src/EventBus/EventBus.cpp
+        src/EventBus/EventBus.h
+        src/EventBus/Event.h
+        src/Systems/DamageSystem.h)
 
 target_include_directories(${project_name}
         PRIVATE

@@ -6,14 +6,14 @@
 #include "Components/TransformComponent.h"
 #include "Components/BoxColliderComponent.h"
 #include "Logger/logger.h"
-
+#include "Events/CollisionEvent.h"
 
 CollisionSystem::CollisionSystem() {
   RequreComponent<TransformComponent>();
   RequreComponent<BoxColliderComponent>();
 }
 
-void CollisionSystem::Update() {
+void CollisionSystem::Update(std::unique_ptr<EventBus>& eventBus) {
     auto& entities = GetSystemEntities();
 
     for (auto i = entities.begin(); i != entities.end();++i){
@@ -35,8 +35,7 @@ void CollisionSystem::Update() {
                                          bCollider.width,bCollider.height);
         if(CheckAABBCollision(boxColliderA,boxColliderB)){
           LOGGER_ERROR("[COLLISION DETECTION] Entity {} collided with Entity {}", entityA.GetId(),entityB.GetId());
-          entityB.Kill();
-          entityA.Kill();
+          eventBus->EmitEvent<CollisionEvent>(entityA,entityB);
         }
       }
     }
