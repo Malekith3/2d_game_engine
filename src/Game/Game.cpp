@@ -12,6 +12,8 @@
 #include "Components/AnimationComponent.h"
 #include "Systems/RenderCollisionSystem.h"
 #include "Components/BoxColliderComponent.h"
+#include "Events/KeyPressedEvent.h"
+#include "Systems/KeyboardControlSystem.h"
 
 Game::Game()
 {
@@ -86,7 +88,9 @@ void Game::ProcessInput()
                 else if(sdlEvent.key.keysym.sym == SDLK_d || sdlEvent.key.keysym.sym == SDLK_KP_D){
                   isDebug = !isDebug;
                 }
+                eventBus->EmitEvent<KeyPressedEvent>(SDL_KeyCode(sdlEvent.key.keysym.sym));
                 break;
+
         }
     }
 }
@@ -105,6 +109,7 @@ void Game::Update()
     eventBus->Reset();
     //Perform Subscription of all systems
     registry->GetSystem<DamageSystem>().SubscribeToEvent(eventBus);
+    registry->GetSystem<KeyboardControlSystem>().SubscribeToEvent(eventBus);
 
     //Update Systems
     registry->Update();
@@ -134,6 +139,7 @@ void Game::LoadLevel(uint32_t level_number){
   // Add the systems that need to be processed in our game
   registry->AddSystem<RenderSystem>();
   registry->AddSystem<DamageSystem>();
+  registry->AddSystem<KeyboardControlSystem>();
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<AnimationSystem>();
   registry->AddSystem<CollisionSystem>();
