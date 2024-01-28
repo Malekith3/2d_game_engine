@@ -14,6 +14,7 @@
 #include "Components/BoxColliderComponent.h"
 #include "Events/KeyPressedEvent.h"
 #include "Systems/KeyboardControlSystem.h"
+#include "Components/KeyboardControlledComponent.h"
 
 Game::Game()
 {
@@ -39,8 +40,8 @@ void Game::Initialize()
     }
     SDL_DisplayMode  displayMode;
     SDL_GetCurrentDisplayMode(0,&displayMode);
-    this->windowWidth   = 800;
-    this->windowHeight  = 600;
+    this->windowWidth   = 1280;
+    this->windowHeight  = 720;
     this->window = SDL_CreateWindow(
             "Game Engine",
             SDL_WINDOWPOS_CENTERED,
@@ -148,7 +149,7 @@ void Game::LoadLevel(uint32_t level_number){
   //Adding Assets
   assetStore->AddTexture("tank-image","../assets/images/tank-panther-right.png",renderer);
   assetStore->AddTexture("truck-image","../assets/images/truck-ford-right.png",renderer);
-  assetStore->AddTexture("chopper-image","../assets/images/chopper.png",renderer);
+  assetStore->AddTexture("chopper-image","../assets/images/chopper-spritesheet.png",renderer);
   assetStore->AddTexture("tilemap-image","../assets/tilemaps/jungle.png",renderer);
 
   //Load a Map
@@ -176,22 +177,27 @@ void Game::LoadLevel(uint32_t level_number){
   Entity chopper = registry->CreateEntity();
 
   // Add some components to that entity
-  chopper.AddComponent<TransformComponent>(glm::vec2(80.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+  chopper.AddComponent<TransformComponent>(glm::vec2(80.0, 400.0),
+                                           glm::vec2(1.0, 1.0), 0.0);
   chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
   chopper.AddComponent<SpriteComponent>(32,32,"chopper-image",1);
   chopper.AddComponent<AnimationComponent>(2,12);
+  chopper.AddComponent<KeyboardControlledComponent>(
+      glm::vec2(0,-20),glm::vec2(20,0),
+      glm::vec2(-20,0),glm::vec2(0,20));
 
   // Create an entity
   Entity tank = registry->CreateEntity();
   // Add some components to that entity
-  tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+  tank.AddComponent<TransformComponent>(glm::vec2(600.0, 500.0)
+                                        ,glm::vec2(1.0, 1.0), 0.0);
   tank.AddComponent<RigidBodyComponent>(glm::vec2(-30.0, 0.0));
   tank.AddComponent<SpriteComponent>(32,32,"tank-image",1);
   tank.AddComponent<BoxColliderComponent>(32,32);
 
   Entity track = registry->CreateEntity();
   // Add some components to that entity
-  track.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+  track.AddComponent<TransformComponent>(glm::vec2(100.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
   track.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
   track.AddComponent<SpriteComponent>(32,32, "truck-image",1);
   track.AddComponent<BoxColliderComponent>(32,32);

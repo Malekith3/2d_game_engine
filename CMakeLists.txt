@@ -20,8 +20,7 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
 file(GLOB_RECURSE HEADERS_FILES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
 )
-add_executable(${project_name} ${SRC_FILES} ${HEADERS_FILES}
-        src/Systems/KeyboardControlSystem.h)
+add_executable(${project_name} ${SRC_FILES} ${HEADERS_FILES})
 
 target_include_directories(${project_name}
         PRIVATE
