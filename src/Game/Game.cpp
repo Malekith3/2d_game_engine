@@ -15,6 +15,14 @@
 #include "Events/KeyPressedEvent.h"
 #include "Systems/KeyboardControlSystem.h"
 #include "Components/KeyboardControlledComponent.h"
+#include "Components/CameraFollowComponent.h"
+#include "Systems/CameraMovementSystem.h"
+
+int Game::windowHeight;
+int Game::windowWidth;
+int Game::mapHeight;
+int Game::mapWidth;
+
 
 Game::Game()
 {
@@ -59,6 +67,13 @@ void Game::Initialize()
     {
       LOGGER_ERROR("Error creating SDL renderer");
     }
+
+    // TODO Init camera view with the entire screen area
+    camera.x = 0;
+    camera.y = 0;
+    camera.w = windowHeight;
+    camera.h = windowHeight;
+
     this->isRunning = true;
 }
 
@@ -117,6 +132,7 @@ void Game::Update()
     registry->GetSystem<MovementSystem>().Update(deltaTime);
     registry->GetSystem<AnimationSystem>().Update();
     registry->GetSystem<CollisionSystem>().Update(eventBus);
+    registry->GetSystem<CameraMovementSystem>().Update(camera);
 
 }
 
@@ -124,9 +140,9 @@ void Game::Render()
 {
     SDL_SetRenderDrawColor(this->renderer,21,21,21,255);
     SDL_RenderClear(this->renderer);
-    registry->GetSystem<RenderSystem>().Update(renderer,assetStore);
+  registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
     if(isDebug)
-      registry->GetSystem<RenderCollisionSystem>().Update(renderer);
+      registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
     SDL_RenderPresent(this->renderer);
 }
 
@@ -145,12 +161,14 @@ void Game::LoadLevel(uint32_t level_number){
   registry->AddSystem<AnimationSystem>();
   registry->AddSystem<CollisionSystem>();
   registry->AddSystem<RenderCollisionSystem>();
+  registry->AddSystem<CameraMovementSystem>();
 
   //Adding Assets
   assetStore->AddTexture("tank-image","../assets/images/tank-panther-right.png",renderer);
   assetStore->AddTexture("truck-image","../assets/images/truck-ford-right.png",renderer);
   assetStore->AddTexture("chopper-image","../assets/images/chopper-spritesheet.png",renderer);
   assetStore->AddTexture("tilemap-image","../assets/tilemaps/jungle.png",renderer);
+  assetStore->AddTexture("radar-image", "../assets/images/radar.png",renderer);
 
   //Load a Map
   rapidcsv::Document doc("../assets/tilemaps/jungle.map", rapidcsv::LabelParams(-1, -1));
@@ -161,7 +179,7 @@ void Game::LoadLevel(uint32_t level_number){
 
   for(int y = 0; y < doc.GetRowCount(); y++){
     auto tileRow = doc.GetRow<std::string>(y);
-    for(int x = 0; x <tileRow.size();x++){
+    for(int x = 0; x < tileRow.size(); ++x){
       int srcRectY = (tileRow[x][0] - '0') * tileSize;
       int srcRectX = (tileRow[x][1] - '0') * tileSize;
       auto newTile = registry->CreateEntity();
@@ -172,7 +190,8 @@ void Game::LoadLevel(uint32_t level_number){
     }
   }
 
-
+  mapHeight = doc.GetRowCount() * tileSize * tileScale;
+  mapWidth = doc.GetColumnCount() * tileSize * tileScale;
   // Create an entity
   Entity chopper = registry->CreateEntity();
 
@@ -182,9 +201,12 @@ void Game::LoadLevel(uint32_t level_number){
   chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
   chopper.AddComponent<SpriteComponent>(32,32,"chopper-image",1);
   chopper.AddComponent<AnimationComponent>(2,12);
+  int kSPEED = 100;
   chopper.AddComponent<KeyboardControlledComponent>(
-      glm::vec2(0,-20),glm::vec2(20,0),
-      glm::vec2(-20,0),glm::vec2(0,20));
+      glm::vec2(0,-kSPEED),glm::vec2(kSPEED,0),
+      glm::vec2(-kSPEED,0),glm::vec2(0,kSPEED));
+  chopper.AddComponent<CameraFollowComponent>();
+
 
   // Create an entity
   Entity tank = registry->CreateEntity();
@@ -201,6 +223,12 @@ void Game::LoadLevel(uint32_t level_number){
   track.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
   track.AddComponent<SpriteComponent>(32,32, "truck-image",1);
   track.AddComponent<BoxColliderComponent>(32,32);
+
+  auto radar = registry->CreateEntity();
+
+  radar.AddComponent<TransformComponent>(glm::vec2(1200.0, 5.0));
+  radar.AddComponent<SpriteComponent>(64,64,"radar-image",1,0,0,true);
+  radar.AddComponent<AnimationComponent>(8,24,true);
 
 }
 

@@ -18,6 +18,8 @@ private:
     SDL_Window* window ;
     SDL_Renderer* renderer;
     int millisec_previous_frame = 0;
+    SDL_Rect camera;
+
     std::unique_ptr<Registry> registry;
     std::unique_ptr<AssetStore> assetStore;
     std::unique_ptr<EventBus> eventBus;
@@ -34,8 +36,10 @@ public:
     void Destroy();
     void LoadLevel(uint32_t level_number);
 
-    int windowWidth;
-    int windowHeight;
+    static int windowWidth;
+    static int windowHeight;
+    static int mapWidth;
+    static int mapHeight;
 
 
 };

@@ -12,7 +12,7 @@ class RenderSystem : public System {
  public:
   RenderSystem();
   ~RenderSystem() = default;
-  void Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore);
+  void Update(SDL_Renderer *renderer, std::unique_ptr<AssetStore> &assetStore, SDL_Rect &camera);
 
 };
 

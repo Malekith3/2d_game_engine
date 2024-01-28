@@ -29,19 +29,19 @@ class KeyboardControlSystem : public System {
       switch (event.symbol) {
         case SDLK_UP:
           rigidBody.m_velocity = keyboardControl.upVelocity;
-          sprite.m_srcRect.y = sprite.m_height * SPRITE_ROW::ZERO;
+          sprite.m_srcRect.y = sprite.m_height * SPRITE_DERECTION::UP;
           break;
         case SDLK_RIGHT:
           rigidBody.m_velocity = keyboardControl.rightVelocity;
-          sprite.m_srcRect.y = sprite.m_height * SPRITE_ROW::ONE;
+          sprite.m_srcRect.y = sprite.m_height * SPRITE_DERECTION::RIGHT;
           break;
         case SDLK_LEFT:
           rigidBody.m_velocity = keyboardControl.leftVelocity;
-          sprite.m_srcRect.y = sprite.m_height * SPRITE_ROW::THREE  ;
+          sprite.m_srcRect.y = sprite.m_height * SPRITE_DERECTION::LEFT  ;
           break;
         case SDLK_DOWN:
           rigidBody.m_velocity = keyboardControl.downVelocity;
-          sprite.m_srcRect.y = sprite.m_height * SPRITE_ROW::TWO;
+          sprite.m_srcRect.y = sprite.m_height * SPRITE_DERECTION::DOWN;
           break;
 
         default:
@@ -58,7 +58,7 @@ class KeyboardControlSystem : public System {
   void Update(){}
 
  private:
-  enum SPRITE_ROW{ZERO,ONE,TWO,THREE};
+  enum SPRITE_DERECTION{UP,RIGHT,DOWN,LEFT};
 
 };
 #endif //INC_2D_GAME_ENGINE_SRC_SYSTEMS_KEYBOARDCONTROLSYSTEM_H_

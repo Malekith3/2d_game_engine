@@ -10,7 +10,7 @@
 class RenderCollisionSystem : public System {
  public:
   RenderCollisionSystem();
-  void Update(SDL_Renderer *renderer);
+  void Update(SDL_Renderer *renderer, SDL_Rect &camera);
 };
 
 #endif //INC_2D_GAME_ENGINE_SRC_SYSTEMS_RENDERCOLLISIONSYSTEM_H_
