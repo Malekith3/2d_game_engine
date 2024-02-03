@@ -17,6 +17,8 @@
 #include "Components/KeyboardControlledComponent.h"
 #include "Components/CameraFollowComponent.h"
 #include "Systems/CameraMovementSystem.h"
+#include "Components/ProjectileEmitterComponent.h"
+#include "Systems/ProjectileEmitSystem.h"
 
 int Game::windowHeight;
 int Game::windowWidth;
@@ -133,6 +135,7 @@ void Game::Update()
     registry->GetSystem<AnimationSystem>().Update();
     registry->GetSystem<CollisionSystem>().Update(eventBus);
     registry->GetSystem<CameraMovementSystem>().Update(camera);
+    registry->GetSystem<ProjectileEmitSystem>().Update(registry);
 
 }
 
@@ -162,6 +165,7 @@ void Game::LoadLevel(uint32_t level_number){
   registry->AddSystem<CollisionSystem>();
   registry->AddSystem<RenderCollisionSystem>();
   registry->AddSystem<CameraMovementSystem>();
+  registry->AddSystem<ProjectileEmitSystem>();
 
   //Adding Assets
   assetStore->AddTexture("tank-image","../assets/images/tank-panther-right.png",renderer);
@@ -169,6 +173,7 @@ void Game::LoadLevel(uint32_t level_number){
   assetStore->AddTexture("chopper-image","../assets/images/chopper-spritesheet.png",renderer);
   assetStore->AddTexture("tilemap-image","../assets/tilemaps/jungle.png",renderer);
   assetStore->AddTexture("radar-image", "../assets/images/radar.png",renderer);
+  assetStore->AddTexture("bullet-image","../assets/images/bullet.png",renderer);
 
   //Load a Map
   rapidcsv::Document doc("../assets/tilemaps/jungle.map", rapidcsv::LabelParams(-1, -1));
@@ -211,18 +216,20 @@ void Game::LoadLevel(uint32_t level_number){
   // Create an entity
   Entity tank = registry->CreateEntity();
   // Add some components to that entity
-  tank.AddComponent<TransformComponent>(glm::vec2(600.0, 500.0)
+  tank.AddComponent<TransformComponent>(glm::vec2(300.0, 100.0)
                                         ,glm::vec2(1.0, 1.0), 0.0);
-  tank.AddComponent<RigidBodyComponent>(glm::vec2(-30.0, 0.0));
+  tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
   tank.AddComponent<SpriteComponent>(32,32,"tank-image",1);
   tank.AddComponent<BoxColliderComponent>(32,32);
+  tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0,-10),5000);
 
   Entity track = registry->CreateEntity();
   // Add some components to that entity
-  track.AddComponent<TransformComponent>(glm::vec2(100.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
-  track.AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0));
+  track.AddComponent<TransformComponent>(glm::vec2(100.0, 200.0), glm::vec2(1.0, 1.0), 0.0);
+  track.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
   track.AddComponent<SpriteComponent>(32,32, "truck-image",1);
   track.AddComponent<BoxColliderComponent>(32,32);
+  track.AddComponent<ProjectileEmitterComponent>(glm::vec2(10,0),5000);
 
   auto radar = registry->CreateEntity();
 

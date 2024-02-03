@@ -27,8 +27,8 @@ class DamageSystem : public System{
       void OnCollision(CollisionEvent& event){
         LOGGER_WARN("[DamageSystem::OnCollision] damage Inflicted on Entity {} and Entity {}",
                     event.firstEntity.GetId(),event.secondEntity.GetId());
-        event.firstEntity.Kill();
-        event.secondEntity.Kill();
+        //event.firstEntity.Kill();
+        //event.secondEntity.Kill();
       }
 };
 

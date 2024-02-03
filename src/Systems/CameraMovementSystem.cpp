@@ -11,6 +11,7 @@
 CameraMovementSystem::CameraMovementSystem() {
   RequreComponent<CameraFollowComponent>();
 }
+
 void CameraMovementSystem::Update(SDL_Rect& camera) {
     for(auto entity: GetSystemEntities()){
       auto transform = entity.GetComponent<TransformComponent>();
