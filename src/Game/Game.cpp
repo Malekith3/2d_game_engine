@@ -19,6 +19,7 @@
 #include "Systems/CameraMovementSystem.h"
 #include "Components/ProjectileEmitterComponent.h"
 #include "Systems/ProjectileEmitSystem.h"
+#include "Components/HealthComponent.h"
 
 int Game::windowHeight;
 int Game::windowWidth;
@@ -211,6 +212,7 @@ void Game::LoadLevel(uint32_t level_number){
       glm::vec2(0,-kSPEED),glm::vec2(kSPEED,0),
       glm::vec2(-kSPEED,0),glm::vec2(0,kSPEED));
   chopper.AddComponent<CameraFollowComponent>();
+  chopper.AddComponent<HealthComponent>(100);
 
 
   // Create an entity
@@ -222,6 +224,7 @@ void Game::LoadLevel(uint32_t level_number){
   tank.AddComponent<SpriteComponent>(32,32,"tank-image",1);
   tank.AddComponent<BoxColliderComponent>(32,32);
   tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0,-10),5000);
+  tank.AddComponent<HealthComponent>(100);
 
   Entity track = registry->CreateEntity();
   // Add some components to that entity
@@ -230,6 +233,7 @@ void Game::LoadLevel(uint32_t level_number){
   track.AddComponent<SpriteComponent>(32,32, "truck-image",1);
   track.AddComponent<BoxColliderComponent>(32,32);
   track.AddComponent<ProjectileEmitterComponent>(glm::vec2(10,0),5000);
+  track.AddComponent<HealthComponent>(100);
 
   auto radar = registry->CreateEntity();
 
