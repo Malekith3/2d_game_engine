@@ -8,6 +8,7 @@
 #include "Components/RigidBodyComponent.h"
 #include "Components/BoxColliderComponent.h"
 #include "Components/ProjectileEmitterComponent.h"
+#include "Components/ProjectileComponent.h"
 
 ProjectileEmitSystem::ProjectileEmitSystem() {
   RequreComponent<TransformComponent>();
@@ -19,6 +20,9 @@ void ProjectileEmitSystem::Update(std::unique_ptr<Registry> &registry) {
       auto& projectileEmitter = entity.GetComponent<ProjectileEmitterComponent>();
       const auto transform = entity.GetComponent<TransformComponent>();
 
+      if(projectileEmitter.repeatedFrequency == 0)
+        continue;
+
       if(SDL_GetTicks() - projectileEmitter.lastEmissionTime > projectileEmitter.repeatedFrequency){
         glm::vec2  projectilePosition = transform.m_position;
         if(entity.HasComponent<SpriteComponent>()){
@@ -27,20 +31,71 @@ void ProjectileEmitSystem::Update(std::unique_ptr<Registry> &registry) {
           projectilePosition.y += ( transform.m_scale.y * sprite.m_height / 2 );
         }
         auto projectile = registry->CreateEntity();
-        InitProjectile(projectile,projectilePosition,projectileEmitter.projectileVelocity);
+        InitProjectile(projectile, projectilePosition,
+                       projectileEmitter.projectileVelocity, projectileEmitter);
         projectileEmitter.lastEmissionTime = SDL_GetTicks();
       }
     }
 }
 
-void ProjectileEmitSystem::InitProjectile(Entity &projectile,glm::vec2 &projectilePosition, 
-                                          glm::vec2 &projectileVelocity){
+void ProjectileEmitSystem::InitProjectile(Entity &projectile,
+                                          glm::vec2 &projectilePosition,
+                                          glm::vec2 &projectileVelocity,
+                                          ProjectileEmitterComponent &emitter)
+{
   const static glm::vec2 kDefaultScale = {1.0, 1.0};
   const static float kDefaultRotation = 0.0;
   projectile.AddComponent<TransformComponent>(projectilePosition,kDefaultScale, kDefaultRotation);
   projectile.AddComponent<RigidBodyComponent>(projectileVelocity);
   projectile.AddComponent<SpriteComponent>(4,4,"bullet-image",4);
   projectile.AddComponent<BoxColliderComponent>(4,4);
+  projectile.AddComponent<ProjectileComponent>(emitter.isFriendly,emitter.hitPercentDamage,emitter.projectileDuration);
+  projectile.Group("projectiles");
+}
+
+void ProjectileEmitSystem::OnKeyPressed(KeyPressedEvent &event)
+{
+  if(event.symbol != SDLK_SPACE)
+  {
+    return;
+  }
+
+  for(auto entity : GetSystemEntities())
+  {
+    if(!entity.HasTag("player"))
+      continue;
+
+    auto projectileEmitter = entity.GetComponent<ProjectileEmitterComponent>();
+    auto transform = entity.GetComponent<TransformComponent>();
+    auto rigidBody = entity.GetComponent<RigidBodyComponent>();
+
+
+    // If parent entity has sprite we need to start from the end of sprite
+    glm::vec2 projectilePosition = transform.m_position;
+    if(entity.HasComponent<SpriteComponent>())
+    {
+      auto sprite = entity.GetComponent<SpriteComponent>();
+      projectilePosition.x += (transform.m_scale.x * sprite.m_width / 2);
+      projectilePosition.y += (transform.m_scale.y * sprite.m_height / 2);
+    }
+
+    // Modifying the direction according to movement of the player
+    glm::vec2 projectileVelocity = projectileEmitter.projectileVelocity;
+
+    auto directionChecking = [](int velocity)
+        {
+          auto direction = velocity > 0 ? +1 : -1;
+          return velocity == 0 ? 0 : direction;
+        };
+    int directionX = directionChecking(rigidBody.m_velocity.x);
+    int directionY = directionChecking(rigidBody.m_velocity.y);
+    projectileVelocity.x = projectileEmitter.projectileVelocity.x * directionX;
+    projectileVelocity.y = projectileEmitter.projectileVelocity.y * directionY;
+
+    auto projectile = entity.registry->CreateEntity();
+    InitProjectile(projectile, projectilePosition,
+                   projectileVelocity, projectileEmitter);
+  }
 }
 
 

@@ -11,6 +11,7 @@
 #include "EventBus/EventBus.h"
 #include "Events/KeyPressedEvent.h"
 #include "Components/KeyboardControlledComponent.h"
+#include "Components/ProjectileEmitterComponent.h"
 
 class KeyboardControlSystem : public System {
  public:
@@ -18,6 +19,7 @@ class KeyboardControlSystem : public System {
     RequreComponent<KeyboardControlledComponent>();
     RequreComponent<SpriteComponent>();
     RequreComponent<RigidBodyComponent>();
+    RequreComponent<ProjectileEmitterComponent>();
   };
 
   void OnKeyPressed(KeyPressedEvent& event){
@@ -25,6 +27,7 @@ class KeyboardControlSystem : public System {
       auto keyboardControl = entity.GetComponent<KeyboardControlledComponent>();
       auto& sprite = entity.GetComponent<SpriteComponent>();
       auto& rigidBody = entity.GetComponent<RigidBodyComponent>();
+      auto& emitter = entity.GetComponent<ProjectileEmitterComponent>();
 
       switch (event.symbol) {
         case SDLK_UP:
@@ -43,6 +46,7 @@ class KeyboardControlSystem : public System {
           rigidBody.m_velocity = keyboardControl.downVelocity;
           sprite.m_srcRect.y = sprite.m_height * SPRITE_DERECTION::DOWN;
           break;
+        case SDLK_SPACE:
 
         default:
           break;

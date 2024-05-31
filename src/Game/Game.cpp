@@ -20,6 +20,7 @@
 #include "Components/ProjectileEmitterComponent.h"
 #include "Systems/ProjectileEmitSystem.h"
 #include "Components/HealthComponent.h"
+#include "Systems/ProjectileLifecycleSystem.h"
 
 int Game::windowHeight;
 int Game::windowWidth;
@@ -103,13 +104,15 @@ void Game::ProcessInput()
                 break;
             case SDL_KEYDOWN:
                 if(sdlEvent.key.keysym.sym == SDLK_ESCAPE)
-                    this->isRunning = false;
-                else if(sdlEvent.key.keysym.sym == SDLK_d || sdlEvent.key.keysym.sym == SDLK_KP_D){
+                {
+                  this->isRunning = false;
+                }
+                else if(sdlEvent.key.keysym.sym == SDLK_d || sdlEvent.key.keysym.sym == SDLK_KP_D)
+                {
                   isDebug = !isDebug;
                 }
                 eventBus->EmitEvent<KeyPressedEvent>(SDL_KeyCode(sdlEvent.key.keysym.sym));
                 break;
-
         }
     }
 }
@@ -129,6 +132,7 @@ void Game::Update()
     //Perform Subscription of all systems
     registry->GetSystem<DamageSystem>().SubscribeToEvent(eventBus);
     registry->GetSystem<KeyboardControlSystem>().SubscribeToEvent(eventBus);
+    registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
 
     //Update Systems
     registry->Update();
@@ -137,6 +141,7 @@ void Game::Update()
     registry->GetSystem<CollisionSystem>().Update(eventBus);
     registry->GetSystem<CameraMovementSystem>().Update(camera);
     registry->GetSystem<ProjectileEmitSystem>().Update(registry);
+    registry->GetSystem<ProjectileLifecycleSystem>().Update();
 
 }
 
@@ -167,6 +172,7 @@ void Game::LoadLevel(uint32_t level_number){
   registry->AddSystem<RenderCollisionSystem>();
   registry->AddSystem<CameraMovementSystem>();
   registry->AddSystem<ProjectileEmitSystem>();
+  registry->AddSystem<ProjectileLifecycleSystem>();
 
   //Adding Assets
   assetStore->AddTexture("tank-image","../assets/images/tank-panther-right.png",renderer);
@@ -189,6 +195,7 @@ void Game::LoadLevel(uint32_t level_number){
       int srcRectY = (tileRow[x][0] - '0') * tileSize;
       int srcRectX = (tileRow[x][1] - '0') * tileSize;
       auto newTile = registry->CreateEntity();
+      newTile.Group("tiles");
       newTile.AddComponent<TransformComponent>(   glm::vec2(x * (tileScale * tileSize),
                                                          y * (tileScale * tileSize)),
                                                     glm::vec2(tileScale, tileScale), 0.0);
@@ -200,39 +207,43 @@ void Game::LoadLevel(uint32_t level_number){
   mapWidth = doc.GetColumnCount() * tileSize * tileScale;
   // Create an entity
   Entity chopper = registry->CreateEntity();
-
+  chopper.Tag("player");
   // Add some components to that entity
   chopper.AddComponent<TransformComponent>(glm::vec2(80.0, 400.0),
                                            glm::vec2(1.0, 1.0), 0.0);
   chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
   chopper.AddComponent<SpriteComponent>(32,32,"chopper-image",1);
   chopper.AddComponent<AnimationComponent>(2,12);
-  int kSPEED = 100;
+  chopper.AddComponent<BoxColliderComponent>(32,32);
+  int kSPEED = 50;
   chopper.AddComponent<KeyboardControlledComponent>(
       glm::vec2(0,-kSPEED),glm::vec2(kSPEED,0),
       glm::vec2(-kSPEED,0),glm::vec2(0,kSPEED));
   chopper.AddComponent<CameraFollowComponent>();
   chopper.AddComponent<HealthComponent>(100);
+  chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2{150.0,150.0},0,10000,10,true);
 
 
   // Create an entity
   Entity tank = registry->CreateEntity();
+  tank.Group("enemies");
   // Add some components to that entity
   tank.AddComponent<TransformComponent>(glm::vec2(300.0, 100.0)
                                         ,glm::vec2(1.0, 1.0), 0.0);
   tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
   tank.AddComponent<SpriteComponent>(32,32,"tank-image",1);
   tank.AddComponent<BoxColliderComponent>(32,32);
-  tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0,-10),5000);
+  tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0,-10),5000,10000,10);
   tank.AddComponent<HealthComponent>(100);
 
   Entity track = registry->CreateEntity();
+  track.Group("enemies");
   // Add some components to that entity
   track.AddComponent<TransformComponent>(glm::vec2(100.0, 200.0), glm::vec2(1.0, 1.0), 0.0);
   track.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
   track.AddComponent<SpriteComponent>(32,32, "truck-image",1);
   track.AddComponent<BoxColliderComponent>(32,32);
-  track.AddComponent<ProjectileEmitterComponent>(glm::vec2(10,0),5000);
+  track.AddComponent<ProjectileEmitterComponent>(glm::vec2(10,0),5000,10000,20);
   track.AddComponent<HealthComponent>(100);
 
   auto radar = registry->CreateEntity();

@@ -9,6 +9,8 @@
 #include "EventBus/EventBus.h"
 #include "Events/CollisionEvent.h"
 #include "Components/BoxColliderComponent.h"
+#include "Components/ProjectileComponent.h"
+#include "Components/HealthComponent.h"
 
 class DamageSystem : public System{
  public:
@@ -24,11 +26,68 @@ class DamageSystem : public System{
 
       }
 
-      void OnCollision(CollisionEvent& event){
+      void OnCollision(CollisionEvent& event)
+      {
+        Entity a = event.firstEntity;
+        Entity b = event.secondEntity;
         LOGGER_WARN("[DamageSystem::OnCollision] damage Inflicted on Entity {} and Entity {}",
                     event.firstEntity.GetId(),event.secondEntity.GetId());
+
+        if(a.HasGroup("projectiles") && b.HasTag("player"))
+        {
+          OnProjectileHitsPlayer(a,b);
+        }
+
+        if(b.HasGroup("projectiles") && a.HasTag("player"))
+        {
+          OnProjectileHitsPlayer(b,a);
+        }
+
+        if(a.HasGroup("projectiles") && b.HasGroup("enemies"))
+        {
+          OnProjectileHitsEnemy(a,b);
+        }
+
+        if(b.HasGroup("projectiles") && a.HasGroup("enemies"))
+        {
+          OnProjectileHitsEnemy(b,a);
+        }
+
         //event.firstEntity.Kill();
         //event.secondEntity.Kill();
+      }
+
+ private:
+      void OnProjectileHitsPlayer(Entity projectile, Entity player)
+      {
+        auto projectileComponent = projectile.GetComponent<ProjectileComponent>();
+
+        if(projectileComponent.isFriendly)
+          return;
+
+        auto& playerHealth = player.GetComponent<HealthComponent>();
+        playerHealth.health -= projectileComponent.hitPercentileDamage;
+
+        projectile.Kill();
+
+        if(playerHealth.health <= 0)
+          player.Kill();
+      }
+
+      void OnProjectileHitsEnemy(Entity projectile, Entity enemy)
+      {
+        auto projectileComponent = projectile.GetComponent<ProjectileComponent>();
+
+        if (!projectileComponent.isFriendly)
+          return;
+
+        auto &enemyHealth = enemy.GetComponent<HealthComponent>();
+        enemyHealth.health -= projectileComponent.hitPercentileDamage;
+
+        projectile.Kill();
+
+        if (enemyHealth.health <= 0)
+          enemy.Kill();
       }
 };
 

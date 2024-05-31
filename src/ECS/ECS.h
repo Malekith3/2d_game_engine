@@ -51,6 +51,12 @@ class Entity{
   template <typename TComponent> bool HasComponent() const;
   template <typename TComponent> TComponent& GetComponent() const;
 
+  //Manage entity tags and groups
+  void Tag(std::string_view tag);
+  [[nodiscard]] bool HasTag(std::string_view tag) const;
+  void Group(std::string_view group);
+  [[nodiscard]] bool HasGroup(std::string_view group) const;
+
   // Hold a pointer to the entity's owner registry
   class Registry* registry;
 };
@@ -123,6 +129,14 @@ class Registry{
   //List of free entity's ids that was previously removed
   std::deque<int> freeIds;
 
+  //Entity tags
+  std::unordered_map<std::string, Entity> entityPerTag;
+  std::unordered_map<int, std::string> tagPerEntity;
+
+  //Entity groups
+  std::unordered_map<std::string,  std::set<Entity>> entityPerGroup;
+  std::unordered_map<int, std::string> groupPerEntity;
+
  public:
   Registry() = default;
   Entity CreateEntity();
@@ -138,6 +152,20 @@ class Registry{
   template<typename TSystem>  void RemoveSystem();
   template<typename  TSystem> bool HasSystem() const;
   template<typename  TSystem> TSystem& GetSystem() const;
+
+  // Tag management;
+  void  TagEntity(Entity entity, std::string_view tag);
+  [[nodiscard]] bool EntityHasTag(Entity entity, std::string_view tag) const;
+  [[nodiscard]] Entity GetEntityByTag(std::string_view tag) const;
+  void RemoveEntityTag(Entity entity);
+
+  // Group management
+  void GroupEntity(Entity entity, std::string_view group);
+  [[nodiscard]] bool EntityBelongsToGroup(Entity entity, std::string_view group) const;
+  [[nodiscard]] std::vector<Entity> GetEntitiesByGroup(std::string_view group) const;
+  void RemoveEntityGroup(Entity entity);
+
+
   void Update();
 };
 
