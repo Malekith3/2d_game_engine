@@ -8,17 +8,51 @@
 #include <SDL.h>
 #include "ECS/ECS.h"
 #include "Logger/logger.h"
-#include "Events/KeyPressedEvent.h"
 #include "EventBus/EventBus.h"
+#include "Events/KeyPressedEvent.h"
+#include "Components/KeyboardControlledComponent.h"
+#include "Components/ProjectileEmitterComponent.h"
 
 class KeyboardControlSystem : public System {
  public:
-  KeyboardControlSystem() = default;
+  KeyboardControlSystem(){
+    RequreComponent<KeyboardControlledComponent>();
+    RequreComponent<SpriteComponent>();
+    RequreComponent<RigidBodyComponent>();
+    RequreComponent<ProjectileEmitterComponent>();
+  };
 
   void OnKeyPressed(KeyPressedEvent& event){
-    std::string keySymbol = SDL_GetKeyName(event.symbol);
-    auto keyCode = std::to_string(event.symbol);
-    LOGGER_INFO("[KeyboardControlSystem::OnKeyPressed] Key press event emitted key {} with code {}",keySymbol,keyCode);
+    for(auto entity:GetSystemEntities()){
+      auto keyboardControl = entity.GetComponent<KeyboardControlledComponent>();
+      auto& sprite = entity.GetComponent<SpriteComponent>();
+      auto& rigidBody = entity.GetComponent<RigidBodyComponent>();
+      auto& emitter = entity.GetComponent<ProjectileEmitterComponent>();
+
+      switch (event.symbol) {
+        case SDLK_UP:
+          rigidBody.m_velocity = keyboardControl.upVelocity;
+          sprite.m_srcRect.y = sprite.m_height * SPRITE_DERECTION::UP;
+          break;
+        case SDLK_RIGHT:
+          rigidBody.m_velocity = keyboardControl.rightVelocity;
+          sprite.m_srcRect.y = sprite.m_height * SPRITE_DERECTION::RIGHT;
+          break;
+        case SDLK_LEFT:
+          rigidBody.m_velocity = keyboardControl.leftVelocity;
+          sprite.m_srcRect.y = sprite.m_height * SPRITE_DERECTION::LEFT  ;
+          break;
+        case SDLK_DOWN:
+          rigidBody.m_velocity = keyboardControl.downVelocity;
+          sprite.m_srcRect.y = sprite.m_height * SPRITE_DERECTION::DOWN;
+          break;
+        case SDLK_SPACE:
+
+        default:
+          break;
+      }
+      
+    }
   }
 
   void SubscribeToEvent(std::unique_ptr<EventBus>& eventBus){
@@ -26,6 +60,9 @@ class KeyboardControlSystem : public System {
   }
 
   void Update(){}
+
+ private:
+  enum SPRITE_DERECTION{UP,RIGHT,DOWN,LEFT};
 
 };
 #endif //INC_2D_GAME_ENGINE_SRC_SYSTEMS_KEYBOARDCONTROLSYSTEM_H_

@@ -13,7 +13,7 @@ RenderSystem::RenderSystem() {
   RequreComponent<SpriteComponent>();
 }
 
-void RenderSystem::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore) {
+void RenderSystem::Update(SDL_Renderer *renderer, std::unique_ptr<AssetStore> &assetStore, SDL_Rect &camera) {
   auto allEntities = GetSystemEntities();
   auto sortingLambda = [](Entity& a, Entity& b)
       { return a.GetComponent<SpriteComponent>().m_zIndex < b.GetComponent<SpriteComponent>().m_zIndex;};
@@ -25,8 +25,8 @@ void RenderSystem::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& a
     auto* texture = assetStore->GetTexture(sprite.m_assetId);
     SDL_Rect srcRect = sprite.m_srcRect;
     SDL_Rect dstRect = {
-        static_cast<int>(transform.m_position.x),
-        static_cast<int>(transform.m_position.y),
+        static_cast<int>(transform.m_position.x - (sprite.isFixed ? 0 : camera.x)),
+        static_cast<int>(transform.m_position.y - (sprite.isFixed ? 0 : camera.y)),
         static_cast<int>(transform.m_scale.x * sprite.m_width),
         static_cast<int>(transform.m_scale.y * sprite.m_height)
     };

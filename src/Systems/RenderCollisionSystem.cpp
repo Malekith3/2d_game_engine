@@ -11,17 +11,17 @@ RenderCollisionSystem::RenderCollisionSystem() {
   RequreComponent<BoxColliderComponent>();
 }
 
-void RenderCollisionSystem::Update(SDL_Renderer *renderer) {
+void RenderCollisionSystem::Update(SDL_Renderer *renderer, SDL_Rect &camera) {
 
     for(auto& entity: GetSystemEntities()){
       auto& transform = entity.GetComponent<TransformComponent>();
       auto& boxCollider = entity.GetComponent<BoxColliderComponent>();
 
       SDL_Rect colliderRect = {
-          static_cast<int>(transform.m_position.x + boxCollider.offset.x),
-          static_cast<int>(transform.m_position.y + boxCollider.offset.y),
-          static_cast<int>(boxCollider.width),
-          static_cast<int>(boxCollider.height)
+          static_cast<int>(transform.m_position.x + boxCollider.offset.x - camera.x),
+          static_cast<int>(transform.m_position.y + boxCollider.offset.y - camera.y),
+          static_cast<int>(boxCollider.width * transform.m_scale.x),
+          static_cast<int>(boxCollider.height * transform.m_scale.y)
       };
       SDL_SetRenderDrawColor(renderer,255,0,0,255);
       SDL_RenderDrawRect(renderer,&colliderRect);

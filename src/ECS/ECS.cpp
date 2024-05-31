@@ -15,11 +15,33 @@ bool Entity::operator!=(const Entity &rhs) const {
 bool Entity::operator<(const Entity &other) const {
   return id < other.id;
 }
+
 void Entity::Kill() {
   registry->KillEntity(*this);
 }
 
-const std::vector<Entity> &System::GetEntities() const {
+void Entity::Tag(std::string_view tag)
+{
+  registry->TagEntity(*this, tag);
+}
+
+bool Entity::HasTag(std::string_view tag) const
+{
+  return registry->EntityHasTag(*this, tag);
+}
+
+void Entity::Group(std::string_view group)
+{
+  registry->GroupEntity(*this, group);
+}
+
+bool Entity::HasGroup(std::string_view group) const
+{
+  return registry->EntityBelongsToGroup(*this, group);
+}
+
+const std::vector<Entity> &System::GetEntities() const
+{
   return entities;
 }
 
@@ -76,6 +98,9 @@ void Registry::Update() {
     entityComponentSignatures[entity.GetId()].reset();
 
     freeIds.push_back(entity.GetId());
+
+    RemoveEntityTag(entity);
+    RemoveEntityGroup(entity);
   }
   entitiesToBeKilled.clear();
 
@@ -105,6 +130,75 @@ void Registry::RemoveEntityFromSystem(Entity &entity) {
   for(auto& system : systems){
       system.second->RemoveEntityFromSystem(entity);
   }
+}
+
+void Registry::TagEntity(Entity entity, std::string_view tag)
+{
+  entityPerTag.emplace(std::make_pair(tag,entity));
+  tagPerEntity.emplace(std::make_pair(entity.GetId(),tag));
+}
+
+bool Registry::EntityHasTag(Entity entity, std::string_view tag) const
+{
+  auto iterator = tagPerEntity.find(entity.GetId());
+  return iterator != tagPerEntity.end() && iterator->second == tag;
+}
+
+Entity Registry::GetEntityByTag(std::string_view tag) const
+{
+  return entityPerTag.at(std::string(tag));
+}
+
+void Registry::RemoveEntityTag(Entity entity)
+{
+  if(tagPerEntity.find(entity.GetId()) == tagPerEntity.end())
+  {
+    return;
+  }
+
+  auto tag = tagPerEntity[entity.GetId()];
+  entityPerTag.erase(tag);
+  tagPerEntity.erase(entity.GetId());
+}
+
+void Registry::GroupEntity(Entity entity, std::string_view group)
+{
+  entityPerGroup[std::string(group)].emplace(entity.GetId());
+  groupPerEntity.emplace(entity.GetId(),group);
+}
+
+bool Registry::EntityBelongsToGroup(Entity entity, std::string_view group) const
+{
+  auto groupName = groupPerEntity.find(entity.GetId());
+  return groupName != groupPerEntity.end() && groupName->second == group;
+}
+
+std::vector<Entity> Registry::GetEntitiesByGroup(std::string_view group) const
+{
+  if(entityPerGroup.find(std::string(group)) == entityPerGroup.end())
+    return {};
+
+  auto entitiesInGroup = entityPerGroup.at(std::string(group));
+  return {entitiesInGroup.begin(),entitiesInGroup.end()};
+}
+
+void Registry::RemoveEntityGroup(Entity entity)
+{
+  if(groupPerEntity.find(entity.GetId()) == groupPerEntity.end())
+  {
+    return;
+  }
+
+  auto tag = groupPerEntity[entity.GetId()];
+
+  if(entityPerGroup[tag].find(entity) == entityPerGroup[tag].end())
+  {
+    return;
+  }
+
+  entityPerGroup[tag].erase(entity);
+  groupPerEntity.erase(entity.GetId());
+
 }
 
 
