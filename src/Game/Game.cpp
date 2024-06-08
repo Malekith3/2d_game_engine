@@ -21,6 +21,9 @@
 #include "Systems/ProjectileEmitSystem.h"
 #include "Components/HealthComponent.h"
 #include "Systems/ProjectileLifecycleSystem.h"
+#include "Components/TextLabelComponent.h"
+#include "Systems/RenderTextSystem.h"
+#include "Systems/RenderHealthBarSystem.h"
 
 int Game::windowHeight;
 int Game::windowWidth;
@@ -50,6 +53,12 @@ void Game::Initialize()
         LOGGER_ERROR("Error initializing SDL");
         return;
     }
+    if(TTF_Init() != 0)
+    {
+      LOGGER_ERROR("ERROR to load TTF");
+      return;
+    }
+
     SDL_DisplayMode  displayMode;
     SDL_GetCurrentDisplayMode(0,&displayMode);
     this->windowWidth   = 1280;
@@ -142,17 +151,24 @@ void Game::Update()
     registry->GetSystem<CameraMovementSystem>().Update(camera);
     registry->GetSystem<ProjectileEmitSystem>().Update(registry);
     registry->GetSystem<ProjectileLifecycleSystem>().Update();
-
 }
 
 void Game::Render()
 {
-    SDL_SetRenderDrawColor(this->renderer,21,21,21,255);
-    SDL_RenderClear(this->renderer);
+  SDL_SetRenderDrawColor(this->renderer,21,21,21,255);
+  SDL_RenderClear(this->renderer);
   registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
-    if(isDebug)
-      registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
-    SDL_RenderPresent(this->renderer);
+  registry->GetSystem<RenderTextSystem>().Update(assetStore, renderer, camera);
+  registry->GetSystem<RenderHealthBarSystem>().Update(assetStore, renderer, camera);
+  registry->GetSystem<RenderHealthBarSystem>().Update(assetStore, renderer, camera);
+
+  if(isDebug)
+  {
+    registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
+  }
+
+  SDL_RenderPresent(this->renderer);
+
 }
 
 void Game::Destroy()
@@ -173,6 +189,8 @@ void Game::LoadLevel(uint32_t level_number){
   registry->AddSystem<CameraMovementSystem>();
   registry->AddSystem<ProjectileEmitSystem>();
   registry->AddSystem<ProjectileLifecycleSystem>();
+  registry->AddSystem<RenderTextSystem>();
+  registry->AddSystem<RenderHealthBarSystem>();
 
   //Adding Assets
   assetStore->AddTexture("tank-image","../assets/images/tank-panther-right.png",renderer);
@@ -181,6 +199,8 @@ void Game::LoadLevel(uint32_t level_number){
   assetStore->AddTexture("tilemap-image","../assets/tilemaps/jungle.png",renderer);
   assetStore->AddTexture("radar-image", "../assets/images/radar.png",renderer);
   assetStore->AddTexture("bullet-image","../assets/images/bullet.png",renderer);
+  assetStore->AddFont("chariot-font", "../assets/fonts/charriot.ttf", 14);
+  assetStore->AddFont("health-font", "../assets/fonts/arial.ttf", 8);
 
   //Load a Map
   rapidcsv::Document doc("../assets/tilemaps/jungle.map", rapidcsv::LabelParams(-1, -1));
@@ -251,6 +271,10 @@ void Game::LoadLevel(uint32_t level_number){
   radar.AddComponent<TransformComponent>(glm::vec2(1200.0, 5.0));
   radar.AddComponent<SpriteComponent>(64,64,"radar-image",1,0,0,true);
   radar.AddComponent<AnimationComponent>(8,24,true);
+
+  Entity label = registry->CreateEntity();
+  SDL_Color white = {255,255,255};
+  label.AddComponent<TextLabelComponent>(glm::vec2(100,100),"I AM TEXT LABEL", "chariot-font", white);
 
 }
 
