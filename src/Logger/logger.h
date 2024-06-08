@@ -24,6 +24,5 @@ private:
 #define LOGGER_INFO(...)  Logger::getCoreLogger()->info(__VA_ARGS__)
 #define LOGGER_WARN(...)  Logger::getCoreLogger()->warn(__VA_ARGS__)
 #define LOGGER_ERROR(...) Logger::getCoreLogger()->error(__VA_ARGS__)
-#define LOGGER_FATAL(...) Logger::getCoreLogger()->fatal(__VA_ARGS__)
 
 #endif //ANOMALY_DETECTION_MODULE_ADE_LOGGER_H
