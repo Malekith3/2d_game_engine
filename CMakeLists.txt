@@ -13,6 +13,12 @@ find_package(SDL2_mixer REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_path(RAPIDCSV_INCLUDE_DIRS "rapidcsv.h")
 
+# Add SDL include directories
+include_directories(${SDL2_INCLUDE_DIRS})
+include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
+include_directories(${SDL2_TTF_INCLUDE_DIRS})
+include_directories(${SDL2_MIXER_INCLUDE_DIRS})
+
 
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
@@ -20,6 +26,12 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
 file(GLOB_RECURSE HEADERS_FILES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
 )
+
+file(GLOB_RECURSE IMGUI_SOURCES CONFIGURE_DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs/*.cpp
+)
+add_library(imgui ${IMGUI_SOURCES})
+
 add_executable(${project_name} ${SRC_FILES} ${HEADERS_FILES})
 
 target_include_directories(${project_name}
@@ -27,10 +39,12 @@ target_include_directories(${project_name}
         ${CMAKE_CURRENT_SOURCE_DIR}/libs
 )
 
+
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE  $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
         $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>)
 target_link_libraries(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>)
 target_link_libraries(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>)
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog_header_only)
+target_link_libraries(${PROJECT_NAME} PRIVATE imgui)
 target_include_directories(${PROJECT_NAME} PRIVATE ${RAPIDCSV_INCLUDE_DIRS})
