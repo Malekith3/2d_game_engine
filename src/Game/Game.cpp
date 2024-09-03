@@ -24,6 +24,10 @@
 #include "Components/TextLabelComponent.h"
 #include "Systems/RenderTextSystem.h"
 #include "Systems/RenderHealthBarSystem.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_sdlrenderer2.h"
+#include "imgui/imgui_impl_sdl2.h"
+#include "Systems/RenderGUISystem.h"
 
 int Game::windowHeight;
 int Game::windowWidth;
@@ -80,6 +84,10 @@ void Game::Initialize()
     {
       LOGGER_ERROR("Error creating SDL renderer");
     }
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui_ImplSDL2_InitForSDLRenderer(window,renderer);
+    ImGui_ImplSDLRenderer2_Init(renderer);
 
     // TODO Init camera view with the entire screen area
     camera.x = 0;
@@ -106,6 +114,15 @@ void Game::ProcessInput()
     SDL_Event sdlEvent;
     while (SDL_PollEvent(&sdlEvent))
     {
+        //ImGui SDL input
+      ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+      ImGuiIO io  = ImGui::GetIO();
+      int mouseX, mouseY;
+      const int buttons = SDL_GetMouseState(&mouseX,&mouseY);
+      io.MousePos = ImVec2(mouseX,mouseY);
+      io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
+      io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
+
         switch (sdlEvent.type)
         {
             case SDL_QUIT:
@@ -165,6 +182,7 @@ void Game::Render()
   if(isDebug)
   {
     registry->GetSystem<RenderCollisionSystem>().Update(renderer, camera);
+    registry->GetSystem<RenderGUISystem>().Update(registry, camera);
   }
 
   SDL_RenderPresent(this->renderer);
@@ -173,8 +191,12 @@ void Game::Render()
 
 void Game::Destroy()
 {
+    ImGui_ImplSDLRenderer2_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
     SDL_DestroyRenderer(this->renderer);
     SDL_DestroyWindow(this->window);
+    SDL_Quit();
 }
 
 void Game::LoadLevel(uint32_t level_number){
@@ -191,6 +213,7 @@ void Game::LoadLevel(uint32_t level_number){
   registry->AddSystem<ProjectileLifecycleSystem>();
   registry->AddSystem<RenderTextSystem>();
   registry->AddSystem<RenderHealthBarSystem>();
+  registry->AddSystem<RenderGUISystem>();
 
   //Adding Assets
   assetStore->AddTexture("tank-image","../assets/images/tank-panther-right.png",renderer);
