@@ -34,7 +34,7 @@ void CollisionSystem::Update(std::unique_ptr<EventBus>& eventBus) {
                                          bTransform.m_position.y + bCollider.offset.y,
                                          bCollider.width,bCollider.height);
         if(CheckAABBCollision(boxColliderA,boxColliderB)){
-          LOGGER_ERROR("[COLLISION DETECTION] Entity {} collided with Entity {}", entityA.GetId(),entityB.GetId());
+          LOGGER_DEBUG("[COLLISION DETECTION] Entity {} collided with Entity {}", entityA.GetId(),entityB.GetId());
           eventBus->EmitEvent<CollisionEvent>(entityA,entityB);
         }
       }

@@ -30,7 +30,7 @@ class DamageSystem : public System{
       {
         Entity a = event.firstEntity;
         Entity b = event.secondEntity;
-        LOGGER_WARN("[DamageSystem::OnCollision] damage Inflicted on Entity {} and Entity {}",
+        LOGGER_DEBUG("[DamageSystem::OnCollision] damage Inflicted on Entity {} and Entity {}",
                     event.firstEntity.GetId(),event.secondEntity.GetId());
 
         if(a.HasGroup("projectiles") && b.HasTag("player"))
@@ -53,8 +53,6 @@ class DamageSystem : public System{
           OnProjectileHitsEnemy(b,a);
         }
 
-        //event.firstEntity.Kill();
-        //event.secondEntity.Kill();
       }
 
  private:
