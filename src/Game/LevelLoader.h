@@ -1,0 +1,13 @@
+//
+// Created by sanek on 14/09/2024.
+//
+
+#ifndef INC_2D_GAME_ENGINE_SRC_GAME_LEVELLOADER_H_
+#define INC_2D_GAME_ENGINE_SRC_GAME_LEVELLOADER_H_
+
+class LevelLoader
+{
+
+};
+
+#endif //INC_2D_GAME_ENGINE_SRC_GAME_LOADLEVEL_H_

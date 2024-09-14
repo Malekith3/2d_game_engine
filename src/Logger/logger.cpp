@@ -20,6 +20,6 @@ void Logger::Initialize() {
     // Format need to add before
     spdlog::set_pattern("%^[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] %v%$");
     core_logger = spdlog::stdout_color_mt("Anomaly_Detection_Engine_Logger");
-    spdlog::set_level(spdlog::level::trace);
+    spdlog::set_level(spdlog::level::debug);
     LOGGER_TRACE("Logger was initialised");
 }

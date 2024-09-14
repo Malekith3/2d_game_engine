@@ -11,6 +11,8 @@ find_package(SDL2_image  REQUIRED)
 find_package(SDL2_ttf  REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(sol2 CONFIG REQUIRED)
+find_package(Lua CONFIG REQUIRED)
 find_path(RAPIDCSV_INCLUDE_DIRS "rapidcsv.h")
 
 # Add SDL include directories
@@ -30,6 +32,7 @@ file(GLOB_RECURSE HEADERS_FILES CONFIGURE_DEPENDS
 file(GLOB_RECURSE IMGUI_SOURCES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/*.cpp
 )
+
 add_library(imgui ${IMGUI_SOURCES})
 
 add_executable(${project_name} ${SRC_FILES} ${HEADERS_FILES})
@@ -47,4 +50,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_mixer::S
 target_link_libraries(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>)
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog_header_only)
 target_link_libraries(${PROJECT_NAME} PRIVATE imgui)
+target_link_libraries(${PROJECT_NAME} PRIVATE sol2 ${LUA_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${RAPIDCSV_INCLUDE_DIRS})
