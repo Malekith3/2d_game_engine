@@ -47,7 +47,7 @@ void ProjectileEmitSystem::InitProjectile(Entity &projectile,
   const static float kDefaultRotation = 0.0;
   projectile.AddComponent<TransformComponent>(projectilePosition,kDefaultScale, kDefaultRotation);
   projectile.AddComponent<RigidBodyComponent>(projectileVelocity);
-  projectile.AddComponent<SpriteComponent>(4,4,"bullet-image",4);
+  projectile.AddComponent<SpriteComponent>(4,4,"bullet-texture",4);
   projectile.AddComponent<BoxColliderComponent>(4,4);
   projectile.AddComponent<ProjectileComponent>(emitter.isFriendly,emitter.hitPercentDamage,emitter.projectileDuration);
   projectile.Group("projectiles");

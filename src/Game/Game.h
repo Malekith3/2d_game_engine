@@ -7,6 +7,7 @@
 #include <SDL2/SDL_image.h>
 #include "AssetStore/AssetStore.h"
 #include "EventBus/EventBus.h"
+#include "sol/state.hpp"
 
 const int FPS = 30;
 const int MILLISEC_PER_FRAME = 1000 / FPS;
@@ -23,6 +24,7 @@ private:
     std::unique_ptr<Registry> registry;
     std::unique_ptr<AssetStore> assetStore;
     std::unique_ptr<EventBus> eventBus;
+    sol::state _lua;
 
 public:
     Game();
@@ -34,7 +36,6 @@ public:
     void Update();
     void Render();
     void Destroy();
-    void LoadLevel(uint32_t level_number);
 
     static int windowWidth;
     static int windowHeight;
