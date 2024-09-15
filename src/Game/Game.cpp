@@ -29,6 +29,8 @@
 #include "imgui/imgui_impl_sdl2.h"
 #include "Systems/RenderGUISystem.h"
 #include "Common/TagGroups.h"
+#include "LevelLoader.h"
+#include "Systems/ScriptSystem.h"
 
 int Game::windowHeight;
 int Game::windowWidth;
@@ -66,8 +68,8 @@ void Game::Initialize()
 
     SDL_DisplayMode  displayMode;
     SDL_GetCurrentDisplayMode(0,&displayMode);
-    this->windowWidth   = 800;
-    this->windowHeight  = 600;
+    this->windowWidth   = 1280;
+    this->windowHeight  = 700;
     this->window = SDL_CreateWindow(
             "Game Engine",
             SDL_WINDOWPOS_CENTERED,
@@ -170,6 +172,7 @@ void Game::Update()
     registry->GetSystem<CameraMovementSystem>().Update(camera);
     registry->GetSystem<ProjectileEmitSystem>().Update(registry);
     registry->GetSystem<ProjectileLifecycleSystem>().Update();
+    registry->GetSystem<ScriptSystem>().Update(deltaTime, SDL_GetTicks());
 }
 
 void Game::Render()
@@ -201,7 +204,7 @@ void Game::Destroy()
     SDL_Quit();
 }
 
-void Game::LoadLevel(uint32_t level_number){
+void Game::Setup() {
   // Add the systems that need to be processed in our game
   registry->AddSystem<RenderSystem>();
   registry->AddSystem<DamageSystem>();
@@ -216,107 +219,12 @@ void Game::LoadLevel(uint32_t level_number){
   registry->AddSystem<RenderTextSystem>();
   registry->AddSystem<RenderHealthBarSystem>();
   registry->AddSystem<RenderGUISystem>();
+  registry->AddSystem<ScriptSystem>();
 
-  //Adding Assets
-  assetStore->AddTexture("tank-image","../assets/images/tank-panther-right.png",renderer);
-  assetStore->AddTexture("truck-image","../assets/images/truck-ford-right.png",renderer);
-  assetStore->AddTexture("chopper-image","../assets/images/chopper-spritesheet.png",renderer);
-  assetStore->AddTexture("tilemap-image","../assets/tilemaps/jungle.png",renderer);
-  assetStore->AddTexture("radar-image", "../assets/images/radar.png",renderer);
-  assetStore->AddTexture("bullet-image","../assets/images/bullet.png",renderer);
-  assetStore->AddTexture("tree-image","../assets/images/tree.png",renderer);
-  assetStore->AddFont("chariot-font", "../assets/fonts/charriot.ttf", 14);
-  assetStore->AddFont("health-font", "../assets/fonts/arial.ttf", 8);
+  registry->GetSystem<ScriptSystem>().CreateLuaBindings(_lua);
 
-  //Load a Map
-  rapidcsv::Document doc("../assets/tilemaps/jungle.map", rapidcsv::LabelParams(-1, -1));
-
-  //constants
-  int tileSize = 32;
-  double tileScale = 2.0;
-
-  for(int y = 0; y < doc.GetRowCount(); y++){
-    auto tileRow = doc.GetRow<std::string>(y);
-    for(int x = 0; x < tileRow.size(); ++x){
-      int srcRectY = (tileRow[x][0] - '0') * tileSize;
-      int srcRectX = (tileRow[x][1] - '0') * tileSize;
-      auto newTile = registry->CreateEntity();
-      newTile.Group("tiles");
-      newTile.AddComponent<TransformComponent>(   glm::vec2(x * (tileScale * tileSize),
-                                                         y * (tileScale * tileSize)),
-                                                    glm::vec2(tileScale, tileScale), 0.0);
-      newTile.AddComponent<SpriteComponent>(tileSize, tileSize,"tilemap-image",0, srcRectX, srcRectY);
-    }
-  }
-
-  mapHeight = doc.GetRowCount() * tileSize * tileScale;
-  mapWidth = doc.GetColumnCount() * tileSize * tileScale;
-  // Create an entity
-  Entity chopper = registry->CreateEntity();
-  chopper.Tag(getTagNameString(TAG_GROUPS::PLAYER));
-  // Add some components to that entity
-  chopper.AddComponent<TransformComponent>(glm::vec2(80.0, 400.0),
-                                           glm::vec2(1.0, 1.0), 0.0);
-  chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
-  chopper.AddComponent<SpriteComponent>(32,32,"chopper-image",1);
-  chopper.AddComponent<AnimationComponent>(2,12);
-  chopper.AddComponent<BoxColliderComponent>(32,32);
-  int kSPEED = 50;
-  chopper.AddComponent<KeyboardControlledComponent>(
-      glm::vec2(0,-kSPEED),glm::vec2(kSPEED,0),
-      glm::vec2(-kSPEED,0),glm::vec2(0,kSPEED));
-  chopper.AddComponent<CameraFollowComponent>();
-  chopper.AddComponent<HealthComponent>(100);
-  chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2{150.0,150.0},0,10000,10,true);
-
-
-  // Create an entity
-  Entity tank = registry->CreateEntity();
-  tank.Group(getTagNameString(TAG_GROUPS::ENEMIES));
-  // Add some components to that entity
-  tank.AddComponent<TransformComponent>(glm::vec2(300.0, 100.0)
-                                        ,glm::vec2(1.0, 1.0), 0.0);
-  tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
-  tank.AddComponent<SpriteComponent>(32,32,"tank-image",1);
-  tank.AddComponent<BoxColliderComponent>(32,32);
-  tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0,-10),5000,10000,10);
-  tank.AddComponent<HealthComponent>(100);
-
-  Entity track = registry->CreateEntity();
-  track.Group(getTagNameString(TAG_GROUPS::ENEMIES));
-  // Add some components to that entity
-  track.AddComponent<TransformComponent>(glm::vec2(500.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
-  track.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 0.0));
-  track.AddComponent<SpriteComponent>(32,32, "truck-image",1);
-  track.AddComponent<BoxColliderComponent>(32,32);
-  track.AddComponent<HealthComponent>(100);
-
-  auto treeA = registry->CreateEntity();
-  treeA.Group(getTagNameString(TAG_GROUPS::OBSTACLES));
-  treeA.AddComponent<TransformComponent>(glm::vec2(600.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
-  treeA.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
-  treeA.AddComponent<SpriteComponent>(16,32, "tree-image",1);
-  treeA.AddComponent<BoxColliderComponent>(32,16);
-
-  auto treeB = registry->CreateEntity();
-  treeB.Group(getTagNameString(TAG_GROUPS::OBSTACLES));
-  treeB.AddComponent<TransformComponent>(glm::vec2(400.0, 495.0), glm::vec2(1.0, 1.0), 0.0);
-  treeB.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
-  treeB.AddComponent<SpriteComponent>(16,32, "tree-image",1);
-  treeB.AddComponent<BoxColliderComponent>(32,16);
-
-//  auto radar = registry->CreateEntity();
-//  radar.AddComponent<TransformComponent>(glm::vec2(200.0, 5.0));
-//  radar.AddComponent<SpriteComponent>(64,64,"radar-image",1,0,0,true);
-//  radar.AddComponent<AnimationComponent>(8,24,true);
-//
-//  Entity label = registry->CreateEntity();
-//  SDL_Color white = {255,255,255};
-//  label.AddComponent<TextLabelComponent>(glm::vec2(100,100),"I AM TEXT LABEL", "chariot-font", white);
-
-}
-
-void Game::Setup() {
-  LoadLevel(1);
+  LevelLoader loader;
+  _lua.open_libraries(sol::lib::base, sol::lib::math);
+  loader.LoadLevel(_lua, registry, assetStore, renderer, 1);
 }
 
