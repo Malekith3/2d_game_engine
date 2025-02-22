@@ -35,7 +35,7 @@ void LevelLoader::LoadLevel(sol::state& lua,
                             int level)
 {
 
-  auto script = lua.load_file(fmt::format("../assets/scripts/Level{}.lua", level));
+  auto script = lua.load_file(fmt::format("assets/scripts/Level{}.lua", level));
 
   if(!script.valid())
   {
@@ -44,7 +44,7 @@ void LevelLoader::LoadLevel(sol::state& lua,
     return;
   }
 
-  lua.script_file(fmt::format("../assets/scripts/Level{}.lua", level));
+  lua.script_file(fmt::format("assets/scripts/Level{}.lua", level));
   sol::table levelData =  lua["Level"];
   sol::table assets = levelData["assets"];
 

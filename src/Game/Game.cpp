@@ -224,7 +224,7 @@ void Game::Setup() {
   registry->GetSystem<ScriptSystem>().CreateLuaBindings(_lua);
 
   LevelLoader loader;
-  _lua.open_libraries(sol::lib::base, sol::lib::math);
+  _lua.open_libraries(sol::lib::base, sol::lib::os, sol::lib::math);
   loader.LoadLevel(_lua, registry, assetStore, renderer, 1);
 }
 

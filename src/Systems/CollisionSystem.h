@@ -9,7 +9,7 @@
 class CollisionSystem : public System {
  public:
   CollisionSystem();
-  void CollisionSystem::Update(std::unique_ptr<EventBus>& eventBus);
+  void Update(std::unique_ptr<EventBus>& eventBus);
 };
 
 struct CollisionBoxWrapper{
